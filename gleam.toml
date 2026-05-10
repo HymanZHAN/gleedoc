@@ -1,13 +1,13 @@
 name = "gleedoc"
-version = "1.0.0"
+version = "0.1.0-rc"
 
 # Fill out these fields if you intend to generate HTML documentation or publish
 # your project to the Hex package manager.
 #
-# description = ""
-# licences = ["Apache-2.0"]
-# repository = { type = "github", user = "", repo = "" }
-# links = [{ title = "Website", href = "" }]
+description = "A doc test library for Gleam, inspired by Rust and Elixir's doctest tooling."
+licences = ["Apache-2.0"]
+repository = { type = "github", user = "HymanZHAN", repo = "https://github.com/HymanZHAN/gleedoc" }
+links = [{ title = "Website", href = "https://github.com/HymanZHAN/gleedoc" }]
 #
 # For a full reference of all the available options, you can have a look at
 # https://gleam.run/writing-gleam/gleam-toml/.
