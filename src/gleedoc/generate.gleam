@@ -11,10 +11,6 @@ import snag
 /// Configuration for test generation.
 pub type Config {
   Config(
-    /// The module name being tested, e.g. "mymodule"
-    module_name: String,
-    /// The package name being tested
-    package_name: String,
     /// Directory to write generated tests to, typically "test"
     output_dir: String,
   )

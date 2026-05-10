@@ -31,12 +31,7 @@ pub fn generate_single_test_file_test() {
       doc_line_offset: 3,
     )
 
-  let config =
-    generate.Config(
-      module_name: "math",
-      package_name: "testpkg",
-      output_dir: "test",
-    )
+  let config = generate.Config(output_dir: "test")
 
   let result = generate.generate_tests([block], config)
   let paths = should.be_ok(result)

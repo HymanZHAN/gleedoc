@@ -6,7 +6,7 @@ version = "0.1.0-rc"
 #
 description = "A doc test library for Gleam, inspired by Rust and Elixir's doctest tooling."
 licences = ["Apache-2.0"]
-repository = { type = "github", user = "HymanZHAN", repo = "https://github.com/HymanZHAN/gleedoc" }
+repository = { type = "github", user = "HymanZHAN", repo = "gleedoc" }
 links = [{ title = "Website", href = "https://github.com/HymanZHAN/gleedoc" }]
 #
 # For a full reference of all the available options, you can have a look at

@@ -8,12 +8,7 @@ import simplifile
 pub fn full_pipeline_test() {
   // Run gleedoc on the example module
   let config =
-    gleedoc.GleedocConfig(
-      module_name: "example",
-      package_name: "gleedoc",
-      output_dir: "test",
-      source_dir: "test/fixtures",
-    )
+    gleedoc.GleedocConfig(output_dir: "test", source_dir: "test/fixtures")
 
   let result = gleedoc.run(config)
   should.be_ok(result)

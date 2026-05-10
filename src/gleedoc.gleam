@@ -10,10 +10,6 @@ import snag
 /// Configuration for a gleedoc run.
 pub type GleedocConfig {
   GleedocConfig(
-    /// The module name being tested, e.g. "mymodule"
-    module_name: String,
-    /// The package name being tested
-    package_name: String,
     /// Directory to write generated tests to, typically "test"
     output_dir: String,
     /// Directory to read source files from, typically "src"
@@ -47,12 +43,7 @@ pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
       Ok(Nil)
     }
     blocks -> {
-      let gen_config =
-        Config(
-          module_name: config.module_name,
-          package_name: config.package_name,
-          output_dir: config.output_dir,
-        )
+      let gen_config = Config(output_dir: config.output_dir)
 
       // Clean old generated tests first
       use _ <- result.try(generate.clean_generated(config.output_dir))
@@ -67,23 +58,11 @@ pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
 
 /// CLI entry point. Reads gleam.toml to infer module/package names.
 pub fn main() -> Nil {
-  let config =
-    GleedocConfig(
-      module_name: "gleedoc",
-      package_name: "gleedoc",
-      output_dir: "test",
-      source_dir: "src",
-    )
+  let config = GleedocConfig(output_dir: "test", source_dir: "src")
 
   case run(config) {
-    Ok(Nil) -> {
-      // Successfully generated tests
-      Nil
-    }
-    Error(_snag) -> {
-      // In a real CLI we'd print the error
-      Nil
-    }
+    Ok(Nil) -> Nil
+    Error(snag) -> panic as snag.issue
   }
 }
 
