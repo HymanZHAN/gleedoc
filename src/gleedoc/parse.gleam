@@ -8,12 +8,14 @@ pub type CodeBlock {
   CodeBlock(
     /// The language tag, e.g. "gleam" or ""
     language: String,
-    /// The raw code inside the fence
+    /// The raw code inside the fence (without import statements)
     code: String,
     /// The source doc block this came from
     source: DocBlock,
     /// The 1-based line number within the doc comment where the code block starts
     doc_line_offset: Int,
+    /// Import statements extracted from the code block
+    imports: List(String),
   )
 }
 
@@ -38,12 +40,14 @@ fn extract_from_lines(
       case current_block {
         Some(#(lang, code_lines, start)) -> {
           let code = code_lines |> list.reverse |> string.join("\n")
+          let #(imports, code_without_imports) = extract_imports(code)
           let block =
             CodeBlock(
               language: lang,
-              code: code,
+              code: code_without_imports,
               source: doc,
               doc_line_offset: start,
+              imports: imports,
             )
           list.reverse([block, ..accumulated])
         }
@@ -74,12 +78,14 @@ fn extract_from_lines(
           case trimmed == "```" {
             True -> {
               let code = code_lines |> list.reverse |> string.join("\n")
+              let #(imports, code_without_imports) = extract_imports(code)
               let block =
                 CodeBlock(
                   language: lang,
-                  code: code,
+                  code: code_without_imports,
                   source: doc,
                   doc_line_offset: start,
+                  imports: imports,
                 )
               extract_from_lines(
                 rest,
@@ -103,6 +109,25 @@ fn extract_from_lines(
       }
     }
   }
+}
+
+/// Extract import statements from code and return them separately.
+fn extract_imports(code: String) -> #(List(String), String) {
+  let lines = string.split(code, "\n")
+  let imports =
+    list.filter_map(lines, fn(line) {
+      let trimmed = string.trim(line)
+      case string.starts_with(trimmed, "import ") {
+        True -> Ok(trimmed)
+        False -> Error(Nil)
+      }
+    })
+  let rest =
+    list.filter(lines, fn(line) {
+      let trimmed = string.trim(line)
+      !string.starts_with(trimmed, "import ")
+    })
+  #(imports, string.join(rest, "\n"))
 }
 
 /// Filter code blocks to only those tagged as `gleam`.

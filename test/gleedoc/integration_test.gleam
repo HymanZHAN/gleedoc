@@ -14,7 +14,7 @@ pub fn full_pipeline_test() {
   should.be_ok(result)
 
   // Find any generated test files
-  let files = simplifile.read_directory("test")
+  let files = simplifile.read_directory("test/doc_test")
   let all_files = should.be_ok(files)
   let generated_files =
     list.filter(all_files, fn(f) {
@@ -26,14 +26,15 @@ pub fn full_pipeline_test() {
 
   // Clean up any generated files
   list.each(generated_files, fn(f) {
-    let _ = simplifile.delete("test/" <> f)
+    let _ = simplifile.delete("test/doc_test/" <> f)
     Nil
   })
 }
 
 pub fn clean_generated_test() {
   // Create a fake generated file
-  let fake_path = "test/gleedoc_generated_fake_test.gleam"
+  let _ = simplifile.create_directory_all("test/doc_test")
+  let fake_path = "test/doc_test/gleedoc_generated_fake_test.gleam"
   let _ = simplifile.write(fake_path, "// fake")
 
   let result = generate.clean_generated("test")

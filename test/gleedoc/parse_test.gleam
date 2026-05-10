@@ -100,3 +100,33 @@ pub fn multiple_code_blocks_test() {
   let blocks = parse.extract_code_blocks([doc])
   should.equal(list.length(blocks), 2)
 }
+
+pub fn extract_imports_from_code_block_test() {
+  let doc =
+    DocBlock(
+      lines: [
+        "Example with imports.",
+        "",
+        "```gleam",
+        "import gleam/dict",
+        "import gleam/http",
+        "",
+        "let d = dict.new()",
+        "```",
+      ],
+      target: Some("example"),
+      file: "src/example.gleam",
+      start_line: 1,
+    )
+
+  let blocks = parse.extract_code_blocks([doc])
+  should.equal(list.length(blocks), 1)
+
+  let block = case blocks {
+    [b] -> b
+    _ -> panic as "Expected exactly one code block"
+  }
+
+  should.equal(block.imports, ["import gleam/dict", "import gleam/http"])
+  should.equal(block.code, "\nlet d = dict.new()")
+}
