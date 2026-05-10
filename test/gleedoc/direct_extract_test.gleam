@@ -1,5 +1,5 @@
-import gleeunit/should
 import gleedoc/extract
+import gleeunit/should
 
 pub fn extract_from_real_example_test() {
   let result = extract.doc_blocks_from_file("test/fixtures/example.gleam")

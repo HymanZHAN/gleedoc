@@ -47,11 +47,12 @@ pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
       Ok(Nil)
     }
     blocks -> {
-      let gen_config = Config(
-        module_name: config.module_name,
-        package_name: config.package_name,
-        output_dir: config.output_dir,
-      )
+      let gen_config =
+        Config(
+          module_name: config.module_name,
+          package_name: config.package_name,
+          output_dir: config.output_dir,
+        )
 
       // Clean old generated tests first
       use _ <- result.try(generate.clean_generated(config.output_dir))
@@ -66,12 +67,13 @@ pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
 
 /// CLI entry point. Reads gleam.toml to infer module/package names.
 pub fn main() -> Nil {
-  let config = GleedocConfig(
-    module_name: "gleedoc",
-    package_name: "gleedoc",
-    output_dir: "test",
-    source_dir: "src",
-  )
+  let config =
+    GleedocConfig(
+      module_name: "gleedoc",
+      package_name: "gleedoc",
+      output_dir: "test",
+      source_dir: "src",
+    )
 
   case run(config) {
     Ok(Nil) -> {
@@ -89,11 +91,17 @@ fn find_source_files(source_dir: String) -> Result(List(String), snag.Snag) {
   find_gleam_files_recursive(source_dir, [])
 }
 
-fn find_gleam_files_recursive(dir: String, acc: List(String)) -> Result(List(String), snag.Snag) {
+fn find_gleam_files_recursive(
+  dir: String,
+  acc: List(String),
+) -> Result(List(String), snag.Snag) {
   use entries <- result.try(
-    simplifile.read_directory(dir)
+    dir
+    |> simplifile.read_directory
     |> result.map_error(fn(err) {
-      snag.new("Failed to read directory: " <> dir <> " - " <> string.inspect(err))
+      snag.new(
+        "Failed to read directory: " <> dir <> " - " <> string.inspect(err),
+      )
     }),
   )
 
@@ -101,7 +109,8 @@ fn find_gleam_files_recursive(dir: String, acc: List(String)) -> Result(List(Str
   |> list.try_fold(acc, fn(acc, entry) {
     let path = dir <> "/" <> entry
     use is_dir <- result.try(
-      simplifile.is_directory(path)
+      path
+      |> simplifile.is_directory
       |> result.map_error(fn(err) {
         snag.new("Failed to stat: " <> path <> " - " <> string.inspect(err))
       }),

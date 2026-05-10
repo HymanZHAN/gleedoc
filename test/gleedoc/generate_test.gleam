@@ -1,39 +1,42 @@
 import gleam/list
 import gleam/option.{Some}
 import gleam/string
-import gleeunit/should
 import gleedoc/extract.{DocBlock}
 import gleedoc/generate
 import gleedoc/parse.{CodeBlock}
+import gleeunit/should
 import simplifile
 
 pub fn generate_single_test_file_test() {
-  let doc = DocBlock(
-    lines: [
-      "Adds two numbers.",
-      "",
-      "```gleam",
-      "let result = add(1, 2)",
-      "let assert True = result == 3",
-      "```",
-    ],
-    target: Some("add"),
-    file: "src/math.gleam",
-    start_line: 1,
-  )
+  let doc =
+    DocBlock(
+      lines: [
+        "Adds two numbers.",
+        "",
+        "```gleam",
+        "let result = add(1, 2)",
+        "let assert True = result == 3",
+        "```",
+      ],
+      target: Some("add"),
+      file: "src/math.gleam",
+      start_line: 1,
+    )
 
-  let block = CodeBlock(
-    language: "gleam",
-    code: "let result = add(1, 2)\nlet assert True = result == 3",
-    source: doc,
-    doc_line_offset: 3,
-  )
+  let block =
+    CodeBlock(
+      language: "gleam",
+      code: "let result = add(1, 2)\nlet assert True = result == 3",
+      source: doc,
+      doc_line_offset: 3,
+    )
 
-  let config = generate.Config(
-    module_name: "math",
-    package_name: "testpkg",
-    output_dir: "test",
-  )
+  let config =
+    generate.Config(
+      module_name: "math",
+      package_name: "testpkg",
+      output_dir: "test",
+    )
 
   let result = generate.generate_tests([block], config)
   let paths = should.be_ok(result)

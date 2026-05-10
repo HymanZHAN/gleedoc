@@ -1,11 +1,14 @@
+import glance
 import gleam/list
 import gleam/result
 import gleam/string
-import glance
 import snag
 
 /// Scan a Gleam source file and extract all public definition names.
-pub fn public_names(file_path: String, source: String) -> Result(List(String), snag.Snag) {
+pub fn public_names(
+  file_path: String,
+  source: String,
+) -> Result(List(String), snag.Snag) {
   use module <- result.try(
     glance.module(source)
     |> result.map_error(fn(err) {

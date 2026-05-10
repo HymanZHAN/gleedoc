@@ -1,18 +1,19 @@
 import gleam/list
 import gleam/string
-import gleeunit/should
 import gleedoc
 import gleedoc/generate
+import gleeunit/should
 import simplifile
 
 pub fn full_pipeline_test() {
   // Run gleedoc on the example module
-  let config = gleedoc.GleedocConfig(
-    module_name: "example",
-    package_name: "gleedoc",
-    output_dir: "test",
-    source_dir: "test/fixtures",
-  )
+  let config =
+    gleedoc.GleedocConfig(
+      module_name: "example",
+      package_name: "gleedoc",
+      output_dir: "test",
+      source_dir: "test/fixtures",
+    )
 
   let result = gleedoc.run(config)
   should.be_ok(result)
@@ -20,9 +21,11 @@ pub fn full_pipeline_test() {
   // Find any generated test files
   let files = simplifile.read_directory("test")
   let all_files = should.be_ok(files)
-  let generated_files = list.filter(all_files, fn(f) {
-    string.starts_with(f, "gleedoc_generated_") && string.ends_with(f, "_test.gleam")
-  })
+  let generated_files =
+    list.filter(all_files, fn(f) {
+      string.starts_with(f, "gleedoc_generated_")
+      && string.ends_with(f, "_test.gleam")
+    })
 
   should.be_true(generated_files != [])
 

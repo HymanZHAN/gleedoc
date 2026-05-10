@@ -1,8 +1,8 @@
 import gleam/list
 import gleam/option.{Some}
 import gleam/string
-import gleeunit/should
 import gleedoc/extract
+import gleeunit/should
 import simplifile
 
 const test_file = "test/fixtures/sample.gleam"
@@ -96,10 +96,7 @@ pub fn extract_type_doc_test() {
 }
 
 pub fn extract_const_doc_test() {
-  setup_test_file(
-    "/// The answer.\n"
-    <> "pub const answer = 42\n",
-  )
+  setup_test_file("/// The answer.\n" <> "pub const answer = 42\n")
 
   let result = extract.doc_blocks_from_file(test_file)
   cleanup_test_file()
