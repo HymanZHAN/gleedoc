@@ -195,14 +195,22 @@ fn unique_imports(file: String, module_name: String) -> List(String) {
   // If parsing fails, fall back to a simple qualified import.
   case simplifile.read(file) {
     Ok(source) -> {
-      case scan.public_names(file, source) {
-        Ok([]) -> ["import " <> module_name]
+      // Build the import for the target module itself
+      let target_import = case scan.public_names(file, source) {
+        Ok([]) -> "import " <> module_name
         Ok(names) -> {
           let names_str = string.join(names, ", ")
-          ["import " <> module_name <> ".{" <> names_str <> "}"]
+          "import " <> module_name <> ".{" <> names_str <> "}"
         }
-        Error(_) -> ["import " <> module_name]
+        Error(_) -> "import " <> module_name
       }
+      // Also carry over the source module's own top-level imports so that
+      // doc examples can use them without having to restate them in the snippet.
+      let source_imports = case scan.module_imports(file, source) {
+        Ok(imps) -> imps
+        Error(_) -> []
+      }
+      [target_import, ..source_imports]
     }
     Error(_) -> ["import " <> module_name]
   }
@@ -256,8 +264,7 @@ pub fn clean_generated(output_dir: String) -> Result(Nil, snag.Snag) {
     Ok(files) -> {
       files
       |> list.filter(fn(f) {
-        string.starts_with(f, "gleedoc_")
-        && string.ends_with(f, "_test.gleam")
+        string.starts_with(f, "gleedoc_") && string.ends_with(f, "_test.gleam")
       })
       |> list.each(fn(f) {
         let path = dir <> "/" <> f

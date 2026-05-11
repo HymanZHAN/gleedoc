@@ -167,3 +167,115 @@ pub fn generate_test_with_overlapping_block_imports_test() {
   let _ = simplifile.delete(path)
   Nil
 }
+
+/// The generated test file for a source module should automatically include
+/// that module's own top-level imports so that doc examples can reference
+/// them without re-stating them inside the code snippet.
+pub fn generate_includes_source_module_imports_test() {
+  // bear.gleam imports gleam/order and gleam/string at the top level.
+  // The doc snippet uses `order.Lt` without an explicit import inside the
+  // snippet, so the generated file must carry those imports over.
+  let doc =
+    DocBlock(
+      lines: [
+        "Compares two bears.",
+        "",
+        "```gleam",
+        "let alpha = Bear(id: 1, name: \"Alpha\", kind: \"Grizzly\", hibernating: False)",
+        "let beta  = Bear(id: 2, name: \"Beta\",  kind: \"Polar\",   hibernating: True)",
+        "assert order_asc_by_name(alpha, beta) == order.Lt",
+        "```",
+      ],
+      target: Some("order_asc_by_name"),
+      file: "test/fixtures/bear.gleam",
+      start_line: 1,
+    )
+
+  let block =
+    CodeBlock(
+      language: "gleam",
+      code: "let alpha = Bear(id: 1, name: \"Alpha\", kind: \"Grizzly\", hibernating: False)\nlet beta  = Bear(id: 2, name: \"Beta\",  kind: \"Polar\",   hibernating: True)\nassert order_asc_by_name(alpha, beta) == order.Lt",
+      source: doc,
+      doc_line_offset: 3,
+      imports: [],
+    )
+
+  let config = generate.Config(output_dir: "test")
+
+  let assert Ok(paths) = generate.generate_tests([block], config)
+  let assert [path] = paths
+
+  let assert Ok(text) = simplifile.read(path)
+
+  // The target module itself must be imported (with its public names)
+  assert string.contains(text, "import fixtures/bear")
+  // The source module's own imports must be carried over
+  assert string.contains(text, "import gleam/order")
+  assert string.contains(text, "import gleam/string")
+  // The snippet code must appear
+  assert string.contains(
+    text,
+    "assert order_asc_by_name(alpha, beta) == order.Lt",
+  )
+
+  // Clean up
+  let _ = simplifile.delete(path)
+  Nil
+}
+
+/// When a code snippet also declares an import that overlaps with a source
+/// module import, the two should be merged (not duplicated).
+pub fn generate_merges_snippet_and_module_imports_test() {
+  // Suppose a snippet explicitly writes `import gleam/order.{Lt}` and the
+  // source module already has `import gleam/order`. After merging, only one
+  // `import gleam/order` line should appear (with the unqualified name merged).
+  let doc =
+    DocBlock(
+      lines: [
+        "Compares two bears.",
+        "",
+        "```gleam",
+        "import gleam/order.{Lt}",
+        "let alpha = Bear(id: 1, name: \"Alpha\", kind: \"Grizzly\", hibernating: False)",
+        "let beta  = Bear(id: 2, name: \"Beta\",  kind: \"Polar\",   hibernating: True)",
+        "assert order_asc_by_name(alpha, beta) == Lt",
+        "```",
+      ],
+      target: Some("order_asc_by_name"),
+      file: "test/fixtures/bear.gleam",
+      start_line: 1,
+    )
+
+  let block =
+    CodeBlock(
+      language: "gleam",
+      code: "let alpha = Bear(id: 1, name: \"Alpha\", kind: \"Grizzly\", hibernating: False)\nlet beta  = Bear(id: 2, name: \"Beta\",  kind: \"Polar\",   hibernating: True)\nassert order_asc_by_name(alpha, beta) == Lt",
+      source: doc,
+      doc_line_offset: 3,
+      imports: ["import gleam/order.{Lt}"],
+    )
+
+  let config = generate.Config(output_dir: "test")
+
+  let assert Ok(paths) = generate.generate_tests([block], config)
+  let assert [path] = paths
+
+  let assert Ok(text) = simplifile.read(path)
+
+  // gleam/order should appear exactly once
+  let order_count =
+    text
+    |> string.split("\n")
+    |> list.filter(fn(line) {
+      line |> string.trim |> string.starts_with("import gleam/order")
+    })
+    |> list.length
+  assert order_count == 1
+
+  // The merged line must contain the unqualified name
+  assert string.contains(text, "import gleam/order.{Lt}")
+
+  // Clean up
+  let _ = simplifile.delete(path)
+  Nil
+}
