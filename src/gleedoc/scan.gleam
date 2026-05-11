@@ -10,7 +10,8 @@ pub fn public_names(
   source: String,
 ) -> Result(List(String), snag.Snag) {
   use module <- result.try(
-    glance.module(source)
+    source
+    |> glance.module
     |> result.map_error(fn(err) {
       snag.new("Failed to parse " <> file_path <> ": " <> string.inspect(err))
     }),

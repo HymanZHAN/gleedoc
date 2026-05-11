@@ -15,7 +15,7 @@ pub fn full_pipeline_test() {
   let assert Ok(all_files) = simplifile.read_directory("test/doc_test")
   let generated_files =
     list.filter(all_files, fn(f) {
-      string.starts_with(f, "gleedoc_generated_")
+      string.starts_with(f, "gleedoc_")
       && string.ends_with(f, "_test.gleam")
     })
 

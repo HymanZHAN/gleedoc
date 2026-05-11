@@ -24,7 +24,8 @@ pub fn doc_blocks_from_file(
   file_path: String,
 ) -> Result(List(DocBlock), snag.Snag) {
   use content <- result.try(
-    simplifile.read(file_path)
+    file_path
+    |> simplifile.read
     |> result.map_error(fn(err) {
       snag.new(
         "Failed to read file: " <> file_path <> " - " <> string.inspect(err),

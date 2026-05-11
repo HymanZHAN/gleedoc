@@ -122,7 +122,7 @@ fn test_file_name(source_file: String) -> String {
     |> string.replace(".gleam", "")
     |> string.replace("/", "_")
 
-  "gleedoc_generated_" <> name <> "_test.gleam"
+  "gleedoc_" <> name <> "_test.gleam"
 }
 
 type Import {
@@ -210,7 +210,7 @@ fn unique_imports(file: String, module_name: String) -> List(String) {
 
 fn generate_test_functions(blocks: List(CodeBlock)) -> List(String) {
   blocks
-  |> list.index_map(fn(block, index) { generate_test_function(block, index) })
+  |> list.index_map(generate_test_function)
 }
 
 fn generate_test_function(block: CodeBlock, index: Int) -> String {
@@ -220,11 +220,7 @@ fn generate_test_function(block: CodeBlock, index: Int) -> String {
   }
 
   let func_name =
-    "gleedoc_"
-    <> sanitize_name(target_name)
-    <> "_"
-    <> int.to_string(index + 1)
-    <> "_test"
+    sanitize_name(target_name) <> "_" <> int.to_string(index + 1) <> "_test"
 
   let source_info =
     "// From: "
@@ -246,8 +242,8 @@ fn generate_test_function(block: CodeBlock, index: Int) -> String {
   )
 }
 
+/// Replace characters that aren't valid in function names
 fn sanitize_name(name: String) -> String {
-  // Replace characters that aren't valid in function names
   name
   |> string.replace(".", "_")
   |> string.replace("-", "_")
@@ -260,7 +256,7 @@ pub fn clean_generated(output_dir: String) -> Result(Nil, snag.Snag) {
     Ok(files) -> {
       files
       |> list.filter(fn(f) {
-        string.starts_with(f, "gleedoc_generated_")
+        string.starts_with(f, "gleedoc_")
         && string.ends_with(f, "_test.gleam")
       })
       |> list.each(fn(f) {
