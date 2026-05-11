@@ -21,14 +21,13 @@ pub type GleedocConfig {
 /// test files in the output directory.
 pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
   // Find all gleam source files
-  use files <- result.try(find_source_files(config.source_dir))
+  use files <- result.try(find_gleam_files(config.source_dir))
 
   // Extract doc blocks from all files
   use doc_blocks <- result.try(
     files
     |> list.try_map(extract.doc_blocks_from_file)
-    |> result.map(list.flatten)
-    |> result.map_error(fn(e) { e }),
+    |> result.map(list.flatten),
   )
 
   // Extract gleam code blocks from doc comments
@@ -66,11 +65,11 @@ pub fn main() -> Nil {
   }
 }
 
-fn find_source_files(source_dir: String) -> Result(List(String), snag.Snag) {
-  find_gleam_files_recursive(source_dir, [])
+fn find_gleam_files(source_dir: String) -> Result(List(String), snag.Snag) {
+  go_find_gleam_files(source_dir, [])
 }
 
-fn find_gleam_files_recursive(
+fn go_find_gleam_files(
   dir: String,
   acc: List(String),
 ) -> Result(List(String), snag.Snag) {
@@ -96,7 +95,7 @@ fn find_gleam_files_recursive(
     )
 
     case is_dir {
-      True -> find_gleam_files_recursive(path, acc)
+      True -> go_find_gleam_files(path, acc)
       False -> {
         case string.ends_with(path, ".gleam") {
           True -> Ok([path, ..acc])

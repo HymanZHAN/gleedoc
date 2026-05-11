@@ -32,12 +32,13 @@ pub fn doc_blocks_from_file(
     }),
   )
 
-  let lines =
+  let doc_blocks =
     content
     |> string.split("\n")
     |> list.index_map(fn(line, index) { #(index + 1, line) })
+    |> extract_blocks([], [], file_path)
 
-  Ok(extract_blocks(lines, [], [], file_path))
+  Ok(doc_blocks)
 }
 
 fn extract_blocks(
@@ -47,13 +48,10 @@ fn extract_blocks(
   file: String,
 ) -> List(DocBlock) {
   case lines {
+    // End of file - if there's a pending doc block with no target, we could
+    // include it as module-level docs. For now we drop trailing docs without targets.
     [] -> {
-      // End of file - if there's a pending doc block with no target, we could
-      // include it as module-level docs. For now we drop trailing docs without targets.
-      case current_doc {
-        [] -> list.reverse(accumulated)
-        _ -> list.reverse(accumulated)
-      }
+      list.reverse(accumulated)
     }
 
     [#(line_no, line), ..rest] -> {
