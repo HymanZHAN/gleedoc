@@ -4,7 +4,6 @@ import gleam/string
 import gleedoc/extract.{DocBlock}
 import gleedoc/generate
 import gleedoc/parse.{CodeBlock}
-import gleeunit/should
 import simplifile
 
 pub fn generate_single_test_file_test() {
@@ -34,22 +33,17 @@ pub fn generate_single_test_file_test() {
 
   let config = generate.Config(output_dir: "test")
 
-  let result = generate.generate_tests([block], config)
-  let paths = should.be_ok(result)
-  should.equal(list.length(paths), 1)
+  let assert Ok(paths) = generate.generate_tests([block], config)
+  assert list.length(paths) == 1
 
-  let path = case paths {
-    [p] -> p
-    _ -> panic as "Expected one path"
-  }
+  let assert [path] = paths
 
-  let content = simplifile.read(path)
-  let text = should.be_ok(content)
+  let assert Ok(text) = simplifile.read(path)
 
-  should.be_true(string.contains(path, "doc_test"))
-  should.be_true(string.contains(text, "gleedoc_add_1_test"))
-  should.be_true(string.contains(text, "import math"))
-  should.be_true(string.contains(text, "let result = add(1, 2)"))
+  assert string.contains(path, "doc_test")
+  assert string.contains(text, "gleedoc_add_1_test")
+  assert string.contains(text, "import math")
+  assert string.contains(text, "let result = add(1, 2)")
 
   // Clean up
   let _ = simplifile.delete(path)
@@ -83,20 +77,15 @@ pub fn generate_test_with_block_imports_test() {
 
   let config = generate.Config(output_dir: "test")
 
-  let result = generate.generate_tests([block], config)
-  let paths = should.be_ok(result)
-  should.equal(list.length(paths), 1)
+  let assert Ok(paths) = generate.generate_tests([block], config)
+  assert list.length(paths) == 1
 
-  let path = case paths {
-    [p] -> p
-    _ -> panic as "Expected one path"
-  }
+  let assert [path] = paths
 
-  let content = simplifile.read(path)
-  let text = should.be_ok(content)
+  let assert Ok(text) = simplifile.read(path)
 
-  should.be_true(string.contains(text, "import gleam/dict"))
-  should.be_true(string.contains(text, "let d = dict.new()"))
+  assert string.contains(text, "import gleam/dict")
+  assert string.contains(text, "let d = dict.new()")
 
   // Clean up
   let _ = simplifile.delete(path)
@@ -156,17 +145,12 @@ pub fn generate_test_with_overlapping_block_imports_test() {
 
   let config = generate.Config(output_dir: "test")
 
-  let result = generate.generate_tests([block1, block2], config)
-  let paths = should.be_ok(result)
-  should.equal(list.length(paths), 1)
+  let assert Ok(paths) = generate.generate_tests([block1, block2], config)
+  assert list.length(paths) == 1
 
-  let path = case paths {
-    [p] -> p
-    _ -> panic as "Expected one path"
-  }
+  let assert [path] = paths
 
-  let content = simplifile.read(path)
-  let text = should.be_ok(content)
+  let assert Ok(text) = simplifile.read(path)
 
   // gleam/dict should appear only once
   let dict_count =
@@ -174,10 +158,10 @@ pub fn generate_test_with_overlapping_block_imports_test() {
     |> string.split("\n")
     |> list.filter(fn(line) { string.trim(line) == "import gleam/dict" })
     |> list.length
-  should.equal(dict_count, 1)
+  assert dict_count == 1
 
   // math imports should be merged into one line
-  should.be_true(string.contains(text, "import math.{add, multiply}"))
+  assert string.contains(text, "import math.{add, multiply}")
 
   // Clean up
   let _ = simplifile.delete(path)

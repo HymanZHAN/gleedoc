@@ -1,3 +1,6 @@
+import gleam/dict
+import gleam/result
+
 /// A simple example module demonstrating gleedoc.
 ///
 /// ```gleam
@@ -26,4 +29,26 @@ pub fn multiply(a: Int, b: Int) -> Int {
 /// ```
 pub fn greet(name: String) -> String {
   "Hello, " <> name <> "!"
+}
+
+pub type User {
+  User(first_name: String, last_name: String)
+}
+
+/// Find a user by user ID.
+///
+/// ```gleam
+/// let john = User("John", "Doe")
+/// let bill = User("Bill", "Wilson")
+///
+/// let users =
+///   [#("bill_wilson", bill), #("john_doe", john)]
+///   |> dict.from_list
+///
+/// assert users |> find("hello") == User("", "")
+/// assert users |> find("john_doe") == john
+/// ```
+pub fn find(data: dict.Dict(String, User), name: String) {
+  let default_user = User("", "")
+  data |> dict.get(name) |> result.unwrap(default_user)
 }

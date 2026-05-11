@@ -2,7 +2,6 @@ import gleam/list
 import gleam/option.{None, Some}
 import gleedoc/extract.{DocBlock}
 import gleedoc/parse
-import gleeunit/should
 
 pub fn extract_gleam_code_block_test() {
   let doc =
@@ -20,16 +19,13 @@ pub fn extract_gleam_code_block_test() {
     )
 
   let blocks = parse.extract_code_blocks([doc])
-  should.equal(list.length(blocks), 1)
+  assert list.length(blocks) == 1
 
-  let block = case blocks {
-    [b] -> b
-    _ -> panic as "Expected exactly one code block"
-  }
+  let assert [block] = blocks
 
-  should.equal(block.language, "gleam")
-  should.equal(block.code, "let result = add(1, 2)")
-  should.equal(block.source.target, Some("add"))
+  assert block.language == "gleam"
+  assert block.code == "let result = add(1, 2)"
+  assert block.source.target == Some("add")
 }
 
 pub fn ignore_non_gleam_blocks_test() {
@@ -55,14 +51,11 @@ pub fn ignore_non_gleam_blocks_test() {
     parse.extract_code_blocks([doc])
     |> parse.gleam_blocks
 
-  should.equal(list.length(blocks), 1)
+  assert list.length(blocks) == 1
 
-  let block = case blocks {
-    [b] -> b
-    _ -> panic as "Expected exactly one gleam block"
-  }
+  let assert [block] = blocks
 
-  should.equal(block.language, "gleam")
+  assert block.language == "gleam"
 }
 
 pub fn no_code_blocks_test() {
@@ -75,7 +68,7 @@ pub fn no_code_blocks_test() {
     )
 
   let blocks = parse.extract_code_blocks([doc])
-  should.equal(list.length(blocks), 0)
+  assert blocks == []
 }
 
 pub fn multiple_code_blocks_test() {
@@ -98,7 +91,7 @@ pub fn multiple_code_blocks_test() {
     )
 
   let blocks = parse.extract_code_blocks([doc])
-  should.equal(list.length(blocks), 2)
+  assert list.length(blocks) == 2
 }
 
 pub fn extract_imports_from_code_block_test() {
@@ -120,13 +113,10 @@ pub fn extract_imports_from_code_block_test() {
     )
 
   let blocks = parse.extract_code_blocks([doc])
-  should.equal(list.length(blocks), 1)
+  assert list.length(blocks) == 1
 
-  let block = case blocks {
-    [b] -> b
-    _ -> panic as "Expected exactly one code block"
-  }
+  let assert [block] = blocks
 
-  should.equal(block.imports, ["import gleam/dict", "import gleam/http"])
-  should.equal(block.code, "\nlet d = dict.new()")
+  assert block.imports == ["import gleam/dict", "import gleam/http"]
+  assert block.code == "\nlet d = dict.new()"
 }

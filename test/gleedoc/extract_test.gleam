@@ -1,113 +1,120 @@
 import gleam/list
-import gleam/option.{Some}
-import gleam/string
+import gleam/option.{None, Some}
 import gleedoc/extract
-import gleeunit/should
-import simplifile
 
-const test_file = "test/fixtures/sample.gleam"
+const fixture = "test/fixtures/example.gleam"
 
-fn setup_test_file(content: String) {
-  let _ = simplifile.create_directory("test/fixtures")
-  let _ = simplifile.write(test_file, content)
-  Nil
+pub fn extract_from_real_example_test() {
+  let assert Ok(blocks) = extract.doc_blocks_from_file(fixture)
+
+  assert list.length(blocks) == 4
 }
 
-fn cleanup_test_file() {
-  let _ = simplifile.delete(test_file)
-  Nil
-}
-
-pub fn extract_single_function_doc_test() {
-  setup_test_file(
-    "/// Adds two numbers.\n"
-    <> "///\n"
-    <> "/// ```gleam\n"
-    <> "/// let result = add(1, 2)\n"
-    <> "/// ```\n"
-    <> "pub fn add(a: Int, b: Int) -> Int {\n"
-    <> "  a + b\n"
-    <> "}\n",
-  )
-
-  let result = extract.doc_blocks_from_file(test_file)
-  cleanup_test_file()
-
-  let blocks = should.be_ok(result)
-  should.equal(list.length(blocks), 1)
-
-  let block = case blocks {
-    [b] -> b
-    _ -> panic as "Expected exactly one doc block"
-  }
-
-  should.equal(block.target, Some("add"))
-  should.equal(block.file, test_file)
-  should.equal(block.start_line, 1)
-
-  // Check that lines have /// stripped
-  let first_line = case block.lines {
-    [first, ..] -> first
-    [] -> panic as "Expected at least one line"
-  }
-  should.be_true(string.contains(first_line, "Adds two numbers"))
-}
-
-pub fn extract_multiple_docs_test() {
-  setup_test_file(
-    "/// First function.\n"
-    <> "pub fn one() -> Int { 1 }\n"
-    <> "\n"
-    <> "/// Second function.\n"
-    <> "pub fn two() -> Int { 2 }\n",
-  )
-
-  let result = extract.doc_blocks_from_file(test_file)
-  cleanup_test_file()
-
-  let blocks = should.be_ok(result)
-  should.equal(list.length(blocks), 2)
+pub fn extract_block_targets_test() {
+  let assert Ok(blocks) = extract.doc_blocks_from_file(fixture)
 
   let targets = list.map(blocks, fn(b) { b.target })
-  should.be_true(list.contains(targets, Some("one")))
-  should.be_true(list.contains(targets, Some("two")))
+
+  assert targets == [Some("add"), Some("multiply"), Some("greet"), Some("find")]
 }
 
-pub fn extract_type_doc_test() {
-  setup_test_file(
-    "/// A user in the system.\n"
-    <> "pub type User {\n"
-    <> "  User(name: String)\n"
-    <> "}\n",
-  )
+pub fn extract_block_start_lines_test() {
+  let assert Ok(blocks) = extract.doc_blocks_from_file(fixture)
 
-  let result = extract.doc_blocks_from_file(test_file)
-  cleanup_test_file()
-
-  let blocks = should.be_ok(result)
-  should.equal(list.length(blocks), 1)
-
-  let block = case blocks {
-    [b] -> b
-    _ -> panic as "Expected exactly one doc block"
-  }
-
-  should.equal(block.target, Some("User"))
+  let start_lines = list.map(blocks, fn(b) { b.start_line })
+  assert start_lines == [4, 14, 24, 38]
 }
 
-pub fn extract_const_doc_test() {
-  setup_test_file("/// The answer.\n" <> "pub const answer = 42\n")
+pub fn extract_block_file_path_test() {
+  let assert Ok(blocks) = extract.doc_blocks_from_file(fixture)
 
-  let result = extract.doc_blocks_from_file(test_file)
-  cleanup_test_file()
+  list.each(blocks, fn(b) {
+    assert b.file == fixture
+  })
+}
 
-  let blocks = should.be_ok(result)
-  should.equal(list.length(blocks), 1)
+pub fn extract_add_block_lines_test() {
+  let assert Ok(blocks) = extract.doc_blocks_from_file(fixture)
 
-  let block = case blocks {
-    [b] -> b
-    _ -> panic as "Expected exactly one doc block"
-  }
+  let assert [add_block, ..] = blocks
 
-  should.equal(block.target, Some("answer"))
+  assert add_block.target == Some("add")
+  assert add_block.lines
+    == [
+      "A simple example module demonstrating gleedoc.",
+      "",
+      "```gleam",
+      "let result = add(1, 2)",
+      "let assert True = result == 3",
+      "```",
+    ]
+}
+
+pub fn extract_multiply_block_lines_test() {
+  let assert Ok(blocks) = extract.doc_blocks_from_file(fixture)
+
+  let assert [_, multiply_block, ..] = blocks
+
+  assert multiply_block.target == Some("multiply")
+  assert multiply_block.lines
+    == [
+      "Multiply two numbers.",
+      "",
+      "```gleam",
+      "let result = multiply(3, 4)",
+      "let assert True = result == 12",
+      "```",
+    ]
+}
+
+pub fn extract_greet_block_lines_test() {
+  let assert Ok(blocks) = extract.doc_blocks_from_file(fixture)
+
+  let assert [_, _, greet_block, ..] = blocks
+
+  assert greet_block.target == Some("greet")
+  assert greet_block.lines
+    == [
+      "Greet a user by name.",
+      "",
+      "```gleam",
+      "let msg = greet(\"Alice\")",
+      "let assert True = msg == \"Hello, Alice!\"",
+      "```",
+    ]
+}
+
+pub fn extract_find_block_lines_test() {
+  let assert Ok(blocks) = extract.doc_blocks_from_file(fixture)
+
+  let assert [_, _, _, find_block] = blocks
+
+  assert find_block.target == Some("find")
+  assert find_block.start_line == 38
+  assert find_block.lines
+    == [
+      "Find a user by user ID.",
+      "",
+      "```gleam",
+      "let john = User(\"John\", \"Doe\")",
+      "let bill = User(\"Bill\", \"Wilson\")",
+      "",
+      "let users =",
+      "[#(\"bill_wilson\", bill), #(\"john_doe\", john)]",
+      "|> dict.from_list",
+      "",
+      "assert users |> find(\"hello\") == User(\"\", \"\")",
+      "assert users |> find(\"john_doe\") == john",
+      "```",
+    ]
+}
+
+pub fn extract_no_doc_for_undocumented_type_test() {
+  let assert Ok(blocks) = extract.doc_blocks_from_file(fixture)
+
+  // The `User` type has no doc comment, so it must not appear as a target.
+  let targets = list.map(blocks, fn(b) { b.target })
+
+  assert !list.contains(targets, Some("User"))
+  assert !list.contains(targets, None)
 }
