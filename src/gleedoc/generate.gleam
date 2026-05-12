@@ -141,7 +141,15 @@ fn import_to_string(imp: Import) -> String {
   case imp.names {
     [] -> "import " <> imp.module
     names -> {
-      let names_str = string.join(list.sort(names, string.compare), ", ")
+      let types =
+        names
+        |> list.filter(fn(n) { string.starts_with(n, "type ") })
+        |> list.sort(string.compare)
+      let values =
+        names
+        |> list.filter(fn(n) { !string.starts_with(n, "type ") })
+        |> list.sort(string.compare)
+      let names_str = string.join(list.append(types, values), ", ")
       "import " <> imp.module <> ".{" <> names_str <> "}"
     }
   }
