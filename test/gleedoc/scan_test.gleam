@@ -3,6 +3,7 @@ import gleedoc/scan
 import simplifile
 
 const bear_fixture = "test/fixtures/bear.gleam"
+
 const store_fixture = "test/fixtures/store.gleam"
 
 // ---------------------------------------------------------------------------
@@ -43,9 +44,12 @@ pub fn scan_module_imports_plain_test() {
 pub fn scan_module_imports_unqualified_value_test() {
   // gleam/option is imported as: import gleam/option.{type Option, None, Some}
   // None and Some are values and must NOT be prefixed with `type `.
-  let assert Ok(imports) = scan.module_imports(store_fixture, read(store_fixture))
+  let assert Ok(imports) =
+    scan.module_imports(store_fixture, read(store_fixture))
   let assert Ok(option_import) =
-    list.find(imports, fn(i) { i == "import gleam/option.{type Option, None, Some}" })
+    list.find(imports, fn(i) {
+      i == "import gleam/option.{type Option, None, Some}"
+    })
   assert option_import == "import gleam/option.{type Option, None, Some}"
 }
 
@@ -56,7 +60,8 @@ pub fn scan_module_imports_unqualified_value_test() {
 pub fn scan_module_imports_unqualified_type_prefix_test() {
   // gleam/dict is imported as: import gleam/dict.{type Dict}
   // Dict is a type and must be rendered as `type Dict`, not plain `Dict`.
-  let assert Ok(imports) = scan.module_imports(store_fixture, read(store_fixture))
+  let assert Ok(imports) =
+    scan.module_imports(store_fixture, read(store_fixture))
   let assert Ok(dict_import) =
     list.find(imports, fn(i) {
       i == "import gleam/dict.{type Dict}" || i == "import gleam/dict.{Dict}"
@@ -66,7 +71,8 @@ pub fn scan_module_imports_unqualified_type_prefix_test() {
 
 pub fn scan_module_imports_unqualified_type_no_bare_name_test() {
   // Ensure the bare (incorrect) form `import gleam/dict.{Dict}` is never produced.
-  let assert Ok(imports) = scan.module_imports(store_fixture, read(store_fixture))
+  let assert Ok(imports) =
+    scan.module_imports(store_fixture, read(store_fixture))
   assert !list.contains(imports, "import gleam/dict.{Dict}")
 }
 

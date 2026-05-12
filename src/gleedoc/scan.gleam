@@ -52,8 +52,10 @@ pub fn module_imports(
       let base = "import " <> imp.module
       let unqualified =
         list.flatten([
-          imp.unqualified_types  |> list.map(fn(u) { format_unqualified(u, True) }),
-          imp.unqualified_values |> list.map(fn(u) { format_unqualified(u, False) }),
+          imp.unqualified_types
+            |> list.map(fn(u) { format_unqualified(u, True) }),
+          imp.unqualified_values
+            |> list.map(fn(u) { format_unqualified(u, False) }),
         ])
       case unqualified {
         [] -> base

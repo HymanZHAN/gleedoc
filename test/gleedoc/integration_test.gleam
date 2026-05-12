@@ -1,6 +1,3 @@
-import gleam/list
-import gleam/string
-import gleedoc
 import gleedoc/generate
 import simplifile
 

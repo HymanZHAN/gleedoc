@@ -26,11 +26,11 @@ pub fn greet_3_test() {
 pub fn find_4_test() {
   let john = User("John", "Doe")
   let bill = User("Bill", "Wilson")
-  
+
   let users =
-  [#("bill_wilson", bill), #("john_doe", john)]
-  |> dict.from_list
-  
+    [#("bill_wilson", bill), #("john_doe", john)]
+    |> dict.from_list
+
   assert users |> find("hello") == User("", "")
   assert users |> find("john_doe") == john
 }
