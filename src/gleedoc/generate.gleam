@@ -1,6 +1,6 @@
 import gleam/int
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option
 import gleam/result
 import gleam/string
 import gleedoc/parse.{type CodeBlock}
@@ -96,29 +96,21 @@ fn find_group(
   groups: List(#(String, List(CodeBlock))),
   file: String,
 ) -> Result(#(String, List(CodeBlock)), Nil) {
-  case groups {
-    [] -> Error(Nil)
-    [#(f, b), ..rest] ->
-      case f == file {
-        True -> Ok(#(f, b))
-        False -> find_group(rest, file)
-      }
-  }
+  list.find(groups, fn(pair) { pair.0 == file })
 }
 
 fn module_name_from_file(file: String) -> String {
-  case string.split_once(file, "/") {
-    Ok(#(_, rest)) -> string.replace(rest, ".gleam", "")
-    Error(Nil) -> string.replace(file, ".gleam", "")
-  }
+  string.split_once(file, "/")
+  |> result.map(fn(pair) { pair.1 })
+  |> result.unwrap(file)
+  |> string.replace(".gleam", "")
 }
 
 fn test_file_name(source_file: String) -> String {
   let name =
-    case string.split_once(source_file, "/") {
-      Ok(#(_, rest)) -> rest
-      Error(Nil) -> source_file
-    }
+    string.split_once(source_file, "/")
+    |> result.map(fn(pair) { pair.1 })
+    |> result.unwrap(source_file)
     |> string.replace(".gleam", "")
     |> string.replace("/", "_")
 
@@ -180,14 +172,7 @@ fn list_find_import(
   imports: List(Import),
   module: String,
 ) -> Result(Import, Nil) {
-  case imports {
-    [] -> Error(Nil)
-    [x, ..rest] ->
-      case x.module == module {
-        True -> Ok(x)
-        False -> list_find_import(rest, module)
-      }
-  }
+  list.find(imports, fn(imp) { imp.module == module })
 }
 
 fn unique_imports(file: String, module_name: String) -> List(String) {
@@ -195,21 +180,20 @@ fn unique_imports(file: String, module_name: String) -> List(String) {
   // If parsing fails, fall back to a simple qualified import.
   case simplifile.read(file) {
     Ok(source) -> {
-      // Build the import for the target module itself
-      let target_import = case scan.public_names(file, source) {
-        Ok([]) -> "import " <> module_name
-        Ok(names) -> {
-          let names_str = string.join(names, ", ")
-          "import " <> module_name <> ".{" <> names_str <> "}"
-        }
-        Error(_) -> "import " <> module_name
+      // Build the import for the target module itself.
+      // Unwrap to [] on error or empty, then format accordingly.
+      let names =
+        scan.public_names(file, source)
+        |> result.unwrap([])
+      let target_import = case names {
+        [] -> "import " <> module_name
+        _ -> "import " <> module_name <> ".{" <> string.join(names, ", ") <> "}"
       }
       // Also carry over the source module's own top-level imports so that
       // doc examples can use them without having to restate them in the snippet.
-      let source_imports = case scan.module_imports(file, source) {
-        Ok(imps) -> imps
-        Error(_) -> []
-      }
+      let source_imports =
+        scan.module_imports(file, source)
+        |> result.unwrap([])
       [target_import, ..source_imports]
     }
     Error(_) -> ["import " <> module_name]
@@ -222,10 +206,7 @@ fn generate_test_functions(blocks: List(CodeBlock)) -> List(String) {
 }
 
 fn generate_test_function(block: CodeBlock, index: Int) -> String {
-  let target_name = case block.source.target {
-    Some(name) -> name
-    None -> "module"
-  }
+  let target_name = option.unwrap(block.source.target, "module")
 
   let func_name =
     sanitize_name(target_name) <> "_" <> int.to_string(index + 1) <> "_test"
