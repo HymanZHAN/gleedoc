@@ -52,8 +52,8 @@ pub fn module_imports(
       let base = "import " <> imp.module
       let unqualified =
         list.flatten([
-          imp.unqualified_types |> list.map(format_unqualified),
-          imp.unqualified_values |> list.map(format_unqualified),
+          imp.unqualified_types  |> list.map(fn(u) { format_unqualified(u, True) }),
+          imp.unqualified_values |> list.map(fn(u) { format_unqualified(u, False) }),
         ])
       case unqualified {
         [] -> base
@@ -86,9 +86,14 @@ fn if_public(publicity: glance.Publicity, name: String) -> Result(String, Nil) {
   }
 }
 
-fn format_unqualified(u: glance.UnqualifiedImport) -> String {
-  case u.alias {
-    Some(a) -> u.name <> " as " <> a
-    None -> u.name
+fn format_unqualified(u: glance.UnqualifiedImport, is_type: Bool) -> String {
+  let prefix = case is_type {
+    True -> "type "
+    False -> ""
   }
+  let alias = case u.alias {
+    Some(a) -> " as " <> a
+    None -> ""
+  }
+  prefix <> u.name <> alias
 }
