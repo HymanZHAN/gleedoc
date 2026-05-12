@@ -14,7 +14,7 @@ pub fn generate_single_test_file_test() {
         "",
         "```gleam",
         "let result = add(1, 2)",
-        "let assert True = result == 3",
+        "assert result == 3",
         "```",
       ],
       target: Some("add"),

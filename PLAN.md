@@ -47,7 +47,7 @@ Each ````gleam` code block becomes a candidate doctest:
 ///
 /// ```gleam
 /// let result = add(1, 2)
-/// let assert True = result == 3
+/// assert result == 3
 /// ```
 pub fn add(a: Int, b: Int) -> Int { a + b }
 ```
@@ -67,7 +67,7 @@ import gleeunit/should
 
 pub fn mymodule_add_doctest_1_test() {
   let result = mymodule.add(1, 2)
-  let assert True = result == 3
+  assert result == 3
 }
 ```
 

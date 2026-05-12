@@ -45,7 +45,7 @@ pub fn extract_add_block_lines_test() {
       "",
       "```gleam",
       "let result = add(1, 2)",
-      "let assert True = result == 3",
+      "assert result == 3",
       "```",
     ]
 }
@@ -62,7 +62,7 @@ pub fn extract_multiply_block_lines_test() {
       "",
       "```gleam",
       "let result = multiply(3, 4)",
-      "let assert True = result == 12",
+      "assert result == 12",
       "```",
     ]
 }
@@ -79,7 +79,7 @@ pub fn extract_greet_block_lines_test() {
       "",
       "```gleam",
       "let msg = greet(\"Alice\")",
-      "let assert True = msg == \"Hello, Alice!\"",
+      "assert msg == \"Hello, Alice!\"",
       "```",
     ]
 }

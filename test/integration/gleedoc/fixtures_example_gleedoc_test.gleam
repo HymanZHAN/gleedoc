@@ -7,19 +7,19 @@ import gleam/result
 // From: test/fixtures/example.gleam:6
 pub fn add_1_test() {
   let result = add(1, 2)
-  let assert True = result == 3
+  assert result == 3
 }
 
 // From: test/fixtures/example.gleam:16
 pub fn multiply_2_test() {
   let result = multiply(3, 4)
-  let assert True = result == 12
+  assert result == 12
 }
 
 // From: test/fixtures/example.gleam:26
 pub fn greet_3_test() {
   let msg = greet("Alice")
-  let assert True = msg == "Hello, Alice!"
+  assert msg == "Hello, Alice!"
 }
 
 // From: test/fixtures/example.gleam:40

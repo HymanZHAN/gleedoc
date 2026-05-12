@@ -44,7 +44,7 @@ Write doc comments with `gleam` code blocks in your source files:
 ///
 /// ```gleam
 /// let result = add(1, 2)
-/// let assert True = result == 3
+/// assert result == 3
 /// ```
 pub fn add(a: Int, b: Int) -> Int {
   a + b
@@ -67,7 +67,7 @@ import math.{add}
 // From: src/math.gleam:4
 pub fn add_1_test() {
   let result = add(1, 2)
-  let assert True = result == 3
+  assert result == 3
 }
 ```
 
