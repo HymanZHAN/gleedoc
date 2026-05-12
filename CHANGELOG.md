@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.1.0-rc — 2026-05-10
+## v0.1.0 — 2026-05-12
 
 Initial release.
 

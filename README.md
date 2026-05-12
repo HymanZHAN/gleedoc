@@ -154,3 +154,7 @@ Please kindly create an issue in your human voice, describe the feature request 
 | Multi-target (`erlang` / `javascript`) | ✅ (`cfg`) | ❌          | ❌         | ❌          |
 | Incremental / cached generation        | ✅         | ✅          | ✅         | ❌          |
 | Source-mapped error reporting          | ✅         | ✅          | ✅         | ❌          |
+
+### Know Issues
+
+- [ ] Generated tests will contain unused imports
