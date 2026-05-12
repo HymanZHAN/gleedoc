@@ -14,21 +14,27 @@ pub type Bear {
 /// ## Examples
 ///
 /// ```gleam
+/// import gleam/order
+///
 /// let alpha = Bear(id: 1, name: "Alpha", kind: "Grizzly", hibernating: False)
 /// let beta  = Bear(id: 2, name: "Beta",  kind: "Polar",   hibernating: True)
+///
 /// assert order_asc_by_name(alpha, beta) == order.Lt
 /// ```
 ///
 /// ```gleam
-///
 /// let alpha = Bear(id: 1, name: "Zara", kind: "Grizzly", hibernating: False)
 /// let beta  = Bear(id: 2, name: "Zara", kind: "Polar",   hibernating: True)
+///
 /// assert order_asc_by_name(alpha, beta) == order.Eq
 /// ```
 ///
 /// ```gleam
+/// import gleam/order
+///
 /// let alpha = Bear(id: 1, name: "Zara",  kind: "Grizzly", hibernating: False)
 /// let beta  = Bear(id: 2, name: "Alpha", kind: "Polar",   hibernating: True)
+///
 /// assert order_asc_by_name(alpha, beta) == order.Gt
 /// ```
 ///

@@ -28,7 +28,7 @@ pub fn generate_tests(
   |> list.try_map(fn(pair) {
     let #(file, file_blocks) = pair
     let test_file_name = test_file_name(file)
-    let output_dir = config.output_dir <> "/doc_test"
+    let output_dir = config.output_dir <> "/gleedoc"
     let test_path = output_dir <> "/" <> test_file_name
     let module_name = module_name_from_file(file)
 
@@ -240,7 +240,7 @@ fn sanitize_name(name: String) -> String {
 
 /// Clean up generated test files.
 pub fn clean_generated(output_dir: String) -> Result(Nil, snag.Snag) {
-  let dir = output_dir <> "/doc_test"
+  let dir = output_dir <> "/gleedoc"
   case simplifile.read_directory(dir) {
     Ok(files) -> {
       files

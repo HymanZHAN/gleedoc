@@ -40,7 +40,7 @@ pub fn generate_single_test_file_test() {
 
   let assert Ok(text) = simplifile.read(path)
 
-  assert string.contains(path, "doc_test")
+  assert string.contains(path, "gleedoc")
   assert string.contains(text, "add_1_test")
   assert string.contains(text, "import math")
   assert string.contains(text, "let result = add(1, 2)")
