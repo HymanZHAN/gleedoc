@@ -114,7 +114,7 @@ fn test_file_name(source_file: String) -> String {
     |> string.replace(".gleam", "")
     |> string.replace("/", "_")
 
-  "gleedoc_" <> name <> "_test.gleam"
+  name <> "_gleedoc_test.gleam"
 }
 
 type Import {
@@ -216,7 +216,7 @@ fn generate_test_functions(blocks: List(CodeBlock)) -> List(String) {
 fn generate_test_function(block: CodeBlock, index: Int) -> String {
   let target_name = option.unwrap(block.source.target, "module")
 
-  let func_name =
+  let test_func_name =
     sanitize_name(target_name) <> "_" <> int.to_string(index + 1) <> "_test"
 
   let source_info =
@@ -231,7 +231,7 @@ fn generate_test_function(block: CodeBlock, index: Int) -> String {
     [
       "",
       source_info,
-      "pub fn " <> func_name <> "() {",
+      "pub fn " <> test_func_name <> "() {",
       "  " <> string.replace(code, "\n", "\n  "),
       "}",
     ],
@@ -253,7 +253,7 @@ pub fn clean_generated(output_dir: String) -> Result(Nil, snag.Snag) {
     Ok(files) -> {
       files
       |> list.filter(fn(f) {
-        string.starts_with(f, "gleedoc_") && string.ends_with(f, "_test.gleam")
+        string.ends_with(f, "_gleedoc_test.gleam")
       })
       |> list.each(fn(f) {
         let path = dir <> "/" <> f

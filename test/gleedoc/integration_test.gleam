@@ -4,7 +4,7 @@ import simplifile
 pub fn clean_generated_test() {
   // Create a fake generated file
   let _ = simplifile.create_directory_all("test/gleedoc")
-  let fake_path = "test/gleedoc/gleedoc_generated_fake_test.gleam"
+  let fake_path = "test/gleedoc/fake_gleedoc_test.gleam"
   let _ = simplifile.write(fake_path, "// fake")
 
   let assert Ok(_) = generate.clean_generated("test")

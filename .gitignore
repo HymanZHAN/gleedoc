@@ -2,4 +2,3 @@
 *.ez
 /build
 erl_crash.dump
-test/gleedoc_generated_*_test.gleam
