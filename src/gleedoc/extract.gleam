@@ -1,5 +1,5 @@
 import gleam/list
-import gleam/option.{type Option, None, Some}
+import gleam/option.{type Option}
 import gleam/result
 import gleam/string
 import simplifile
@@ -37,156 +37,129 @@ pub fn doc_blocks_from_file(
     content
     |> string.split("\n")
     |> list.index_map(fn(line, index) { #(index + 1, line) })
-    |> extract_blocks([], [], file_path)
+    |> extract_blocks(file_path)
 
   Ok(doc_blocks)
 }
 
-fn extract_blocks(
-  lines: List(#(Int, String)),
-  accumulated: List(DocBlock),
-  current_doc: List(#(Int, String)),
-  file: String,
-) -> List(DocBlock) {
-  case lines {
-    // End of file - if there's a pending doc block with no target, we could
-    // include it as module-level docs. For now we drop trailing docs without targets.
-    [] -> {
-      list.reverse(accumulated)
-    }
-
-    [#(line_no, line), ..rest] -> {
+fn extract_blocks(lines: List(#(Int, String)), file: String) -> List(DocBlock) {
+  let #(processed_doc_blocks, _trailing_doc) =
+    list.fold(lines, #([], []), fn(state, item) {
+      let #(processed_docs, current_doc) = state
+      let #(line_no, line) = item
       let trimmed = string.trim_start(line)
+
       case string.starts_with(trimmed, "///") {
+        // Still inside a doc comment — append this line to the buffer.
         True -> {
           let doc_line = trimmed |> string.drop_start(3) |> string.trim_start
-          extract_blocks(
-            rest,
-            accumulated,
-            [#(line_no, doc_line), ..current_doc],
-            file,
-          )
+          #(processed_docs, [#(line_no, doc_line), ..current_doc])
         }
+
         False -> {
           case current_doc {
-            [] -> extract_blocks(rest, accumulated, [], file)
+            // No doc comment in progress — skip this line.
+            [] -> state
+
+            // Doc comment in progress.
             _ -> {
-              let is_blank = string.trim(line) == ""
-              case is_blank {
-                True -> extract_blocks(rest, accumulated, current_doc, file)
+              case string.trim(line) == "" {
+                // Blank line inside a doc block — keep buffering.
+                True -> state
+
+                // Non-blank, non-doc line after a doc block — finalize the block.
                 False -> {
                   let target = extract_definition_name(line)
                   let start_line =
                     current_doc
                     |> list.last
-                    |> fn(x) {
-                      case x {
-                        Ok(#(ln, _)) -> ln
-                        Error(Nil) -> line_no
-                      }
-                    }
+                    |> result.map(fn(pair) { pair.0 })
+                    |> result.unwrap(line_no)
                   let doc_lines =
                     current_doc
                     |> list.reverse
                     |> list.map(fn(pair) { pair.1 })
-                  let block =
+                  let new_doc =
                     DocBlock(
                       lines: doc_lines,
                       target: target,
                       file: file,
                       start_line: start_line,
                     )
-                  extract_blocks(rest, [block, ..accumulated], [], file)
+                  #([new_doc, ..processed_docs], [])
                 }
               }
             }
           }
         }
       }
-    }
-  }
+    })
+
+  // End of file — trailing docs without a target are dropped (same as before).
+  list.reverse(processed_doc_blocks)
 }
 
 /// Try to extract a definition name from a source line.
 fn extract_definition_name(line: String) -> Option(String) {
   let trimmed = string.trim_start(line)
 
-  // Try to match: pub fn name( or fn name(
-  case try_extract_function_name(trimmed) {
-    Ok(name) -> Some(name)
-    Error(Nil) -> {
-      // Try to match: pub type Name or type Name
-      case try_extract_type_name(trimmed) {
-        Ok(name) -> Some(name)
-        Error(Nil) -> {
-          // Try to match: pub const name or const name
-          case try_extract_const_name(trimmed) {
-            Ok(name) -> Some(name)
-            Error(Nil) -> None
-          }
-        }
-      }
-    }
-  }
+  // Try each kind in turn; result.or moves to the next on failure.
+  try_extract_function_name(trimmed)
+  |> result.or(try_extract_type_name(trimmed))
+  |> result.or(try_extract_const_name(trimmed))
+  |> option.from_result
 }
 
 fn try_extract_function_name(line: String) -> Result(String, Nil) {
-  let line = case string.starts_with(line, "pub ") {
-    True -> string.drop_start(line, 4)
-    False -> line
-  }
-  case string.starts_with(line, "fn ") {
-    True -> {
-      let rest = string.drop_start(line, 3) |> string.trim_start
-      case string.split_once(rest, "(") {
-        Ok(#(name, _)) -> Ok(string.trim(name))
-        Error(Nil) -> Error(Nil)
-      }
-    }
-    False -> Error(Nil)
-  }
+  // Strip optional "pub " prefix, then require "fn ".
+  let line =
+    string.split_once(line, "pub ")
+    |> result.map(fn(pair) { pair.1 })
+    |> result.unwrap(line)
+
+  use rest <- result.try(string.split_once(line, "fn "))
+
+  rest.1
+  |> string.trim_start
+  |> string.split_once("(")
+  |> result.map(fn(pair) { string.trim(pair.0) })
 }
 
 fn try_extract_type_name(line: String) -> Result(String, Nil) {
-  let line = case string.starts_with(line, "pub ") {
-    True -> string.drop_start(line, 4)
-    False -> line
-  }
-  case string.starts_with(line, "type ") {
-    True -> {
-      let rest = string.drop_start(line, 5) |> string.trim_start
-      // Handle opaque types: pub opaque type Name
-      let rest = case string.starts_with(rest, "opaque ") {
-        True -> string.drop_start(rest, 7) |> string.trim_start
-        False -> rest
-      }
-      case string.split_once(rest, " ") {
-        Ok(#(name, _)) -> Ok(string.trim(name))
-        Error(Nil) -> {
-          case string.split_once(rest, "{") {
-            Ok(#(name, _)) -> Ok(string.trim(name))
-            Error(Nil) -> Ok(string.trim(rest))
-          }
-        }
-      }
-    }
-    False -> Error(Nil)
-  }
+  // Strip optional "pub " prefix, then require "type ".
+  let line =
+    string.split_once(line, "pub ")
+    |> result.map(fn(pair) { pair.1 })
+    |> result.unwrap(line)
+
+  use rest <- result.try(string.split_once(line, "type "))
+
+  // Handle opaque types: "opaque type Name" — strip the extra keyword if present.
+  let rest =
+    string.split_once(rest.1 |> string.trim_start, "opaque ")
+    |> result.map(fn(pair) { pair.1 |> string.trim_start })
+    |> result.unwrap(rest.1 |> string.trim_start)
+
+  // The name ends at the first space, "{", or end-of-string.
+  string.split_once(rest, " ")
+  |> result.or(string.split_once(rest, "{"))
+  |> result.map(fn(pair) { string.trim(pair.0) })
+  |> result.unwrap(string.trim(rest))
+  |> Ok
 }
 
 fn try_extract_const_name(line: String) -> Result(String, Nil) {
-  let line = case string.starts_with(line, "pub ") {
-    True -> string.drop_start(line, 4)
-    False -> line
-  }
-  case string.starts_with(line, "const ") {
-    True -> {
-      let rest = string.drop_start(line, 6) |> string.trim_start
-      case string.split_once(rest, " ") {
-        Ok(#(name, _)) -> Ok(string.trim(name))
-        Error(Nil) -> Ok(string.trim(rest))
-      }
-    }
-    False -> Error(Nil)
-  }
+  // Strip optional "pub " prefix, then require "const ".
+  let line =
+    string.split_once(line, "pub ")
+    |> result.map(fn(pair) { pair.1 })
+    |> result.unwrap(line)
+
+  use rest <- result.try(string.split_once(line, "const "))
+
+  // The name ends at the first space, or end-of-string.
+  string.split_once(rest.1 |> string.trim_start, " ")
+  |> result.map(fn(pair) { string.trim(pair.0) })
+  |> result.unwrap(string.trim(rest.1))
+  |> Ok
 }
