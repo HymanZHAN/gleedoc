@@ -8,12 +8,24 @@ A **doc test** library for Gleam, inspired by Rust and Elixir's doctest tooling.
 Doc tests let you write executable examples in your documentation comments (`///`).
 These examples are extracted, compiled, and run as part of your test suite, ensuring your documentation never goes out of date.
 
+> Disclaimer: This project contains many LLM-generated code, and I used LLMs to do research and design. But I (as a Gleam amateur) have tried my best to review line by line, adjust and refactor.
+
 ## How it works
 
 1. **Extract** `///` doc comments from your `.gleam` source files.
 2. **Find** fenced code blocks tagged with `gleam` inside those comments.
 3. **Generate** test modules in your `test/` directory.
 4. **Run** the generated tests with `gleam test`.
+
+### How other languages do it
+
+| Language   | Approach                                                                      | Key Difference from Gleam                 |
+| ---------- | ----------------------------------------------------------------------------- | ----------------------------------------- |
+| **Rust**   | `cargo test` compiles ` ```rust ` blocks from `///` comments. No REPL needed. | Gleam follows this model closely.         |
+| **Elixir** | `doctest Module` parses `iex>` prompts from `@doc` strings.                   | Elixir has a REPL; Gleam does not.        |
+| **Python** | `doctest` parses `>>>` prompts from docstrings.                               | Python is interpreted; Gleam is compiled. |
+
+Because Gleam is a compiled language with no built-in REPL, **gleedoc** adopts Rust's approach: doc blocks are treated as standalone Gleam code that gets compiled and executed. If a block panics, the test fails.
 
 ## Installation
 
@@ -86,16 +98,6 @@ pub fn main() {
 }
 ```
 
-## How other languages do it
-
-| Language   | Approach                                                                      | Key Difference from Gleam                 |
-| ---------- | ----------------------------------------------------------------------------- | ----------------------------------------- |
-| **Rust**   | `cargo test` compiles ` ```rust ` blocks from `///` comments. No REPL needed. | Gleam follows this model closely.         |
-| **Elixir** | `doctest Module` parses `iex>` prompts from `@doc` strings.                   | Elixir has a REPL; Gleam does not.        |
-| **Python** | `doctest` parses `>>>` prompts from docstrings.                               | Python is interpreted; Gleam is compiled. |
-
-Because Gleam is a compiled language with no built-in REPL, **gleedoc** adopts Rust's approach: doc blocks are treated as standalone Gleam code that gets compiled and executed. If a block panics, the test fails.
-
 ## Architecture
 
 ```
@@ -105,22 +107,26 @@ src/
     extract.gleam         # Line-based doc comment extraction
     parse.gleam           # Markdown code block parsing
     generate.gleam        # Test file generation
-    scan.gleam            # public names and imports extraction with glance
+    scan.gleam            # Public names and imports extraction with glance
 ```
 
 ### Key dependencies
 
-| Package      | Role                                                 |
-| ------------ | ---------------------------------------------------- |
-| `glance`     | Gleam source parser (used for structural validation) |
-| `simplifile` | Cross-target file I/O                                |
-| `snag`       | Lightweight error handling                           |
+| Package      | Role                       |
+| ------------ | -------------------------- |
+| `glance`     | Gleam source parser        |
+| `simplifile` | Cross-target file I/O      |
+| `snag`       | Lightweight error handling |
 
 ## Development
 
 ```sh
 rm -rf test/integration/ && gleam test  # Run the test suite
 ```
+
+### Contributing
+
+Please kindly create an issue in your human voice, describe the feature request or bug clearly with reproduction steps, and ideally with a proposed solution **before** creating any PR.
 
 ## Roadmap
 
