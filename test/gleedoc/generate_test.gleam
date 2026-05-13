@@ -1,3 +1,4 @@
+import glance
 import gleam/list
 import gleam/option.{Some}
 import gleam/string
@@ -13,6 +14,7 @@ pub fn generate_single_test_file_test() {
         "Adds two numbers.",
         "",
         "```gleam",
+        "import math.{add}",
         "let result = add(1, 2)",
         "assert result == 3",
         "```",
@@ -42,7 +44,7 @@ pub fn generate_single_test_file_test() {
 
   assert string.contains(path, "gleedoc")
   assert string.contains(text, "add_1_test")
-  assert string.contains(text, "import math")
+  assert string.contains(text, "import math.{add}")
   assert string.contains(text, "let result = add(1, 2)")
 
   // Clean up
@@ -152,15 +154,16 @@ pub fn generate_test_with_overlapping_block_imports_test() {
 
   let assert Ok(text) = simplifile.read(path)
 
-  // gleam/dict should appear only once
+  // gleam/dict was imported by the code snippets but never actually used as
+  // `dict.something` in the generated test bodies — the filter removes it.
   let dict_count =
     text
     |> string.split("\n")
     |> list.filter(fn(line) { string.trim(line) == "import gleam/dict" })
     |> list.length
-  assert dict_count == 1
+  assert dict_count == 0
 
-  // math imports should be merged into one line
+  // math imports should be merged into one line with both names
   assert string.contains(text, "import math.{add, multiply}")
 
   // Clean up
@@ -209,9 +212,11 @@ pub fn generate_includes_source_module_imports_test() {
 
   // The target module itself must be imported (with its public names)
   assert string.contains(text, "import fixtures/bear")
-  // The source module's own imports must be carried over
+  // gleam/order is carried over and kept because `order.Lt` is referenced
   assert string.contains(text, "import gleam/order")
-  assert string.contains(text, "import gleam/string")
+  // gleam/string is carried over from the source module but filtered out
+  // because no test body uses `string.something` — correct behaviour
+  assert !string.contains(text, "import gleam/string")
   // The snippet code must appear
   assert string.contains(
     text,

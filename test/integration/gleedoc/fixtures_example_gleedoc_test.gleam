@@ -2,7 +2,6 @@
 
 import fixtures/example.{User, add, find, greet, multiply}
 import gleam/dict
-import gleam/result
 
 // From: test/fixtures/example.gleam:6
 pub fn add_1_test() {

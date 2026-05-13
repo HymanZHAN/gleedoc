@@ -2,7 +2,6 @@
 
 import fixtures/bear.{Bear, order_asc_by_name}
 import gleam/order
-import gleam/string
 
 // From: test/fixtures/bear.gleam:16
 pub fn order_asc_by_name_1_test() {
