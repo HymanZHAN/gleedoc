@@ -14,6 +14,7 @@ links = [{ title = "Website", href = "https://github.com/HymanZHAN/gleedoc" }]
 
 [dependencies]
 gleam_stdlib = ">= 1.0.0 and < 2.0.0"
+filepath = ">= 1.0.0 and < 2.0.0"
 glance = ">= 6.0.0 and < 7.0.0"
 simplifile = ">= 2.0.0 and < 3.0.0"
 snag = ">= 1.0.0 and < 2.0.0"

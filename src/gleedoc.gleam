@@ -1,3 +1,4 @@
+import filepath
 import gleam/list
 import gleam/result
 import gleam/string
@@ -85,7 +86,7 @@ fn go_find_gleam_files(
 
   entries
   |> list.try_fold(acc, fn(acc, entry) {
-    let path = dir <> "/" <> entry
+    let path = filepath.join(dir, entry)
     use is_dir <- result.try(
       path
       |> simplifile.is_directory

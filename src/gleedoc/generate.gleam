@@ -1,3 +1,4 @@
+import filepath
 import gleam/int
 import gleam/list
 import gleam/option
@@ -28,8 +29,8 @@ pub fn generate_tests(
   |> list.try_map(fn(pair) {
     let #(file, file_blocks) = pair
     let test_file_name = test_file_name(file)
-    let output_dir = config.output_dir <> "/gleedoc"
-    let test_path = output_dir <> "/" <> test_file_name
+    let output_dir = filepath.join(config.output_dir, "gleedoc")
+    let test_path = filepath.join(output_dir, test_file_name)
     let module_name = module_name_from_file(file)
 
     use _ <- result.try(
@@ -100,19 +101,20 @@ fn find_group(
 }
 
 fn module_name_from_file(file: String) -> String {
-  string.split_once(file, "/")
-  |> result.map(fn(pair) { pair.1 })
-  |> result.unwrap(file)
+  file
+  |> filepath.split
+  |> list.drop(1)
+  |> string.join("/")
   |> string.replace(".gleam", "")
 }
 
 fn test_file_name(source_file: String) -> String {
   let name =
-    string.split_once(source_file, "/")
-    |> result.map(fn(pair) { pair.1 })
-    |> result.unwrap(source_file)
+    source_file
+    |> filepath.split
+    |> list.drop(1)
+    |> string.join("_")
     |> string.replace(".gleam", "")
-    |> string.replace("/", "_")
 
   name <> "_gleedoc_test.gleam"
 }
@@ -248,7 +250,7 @@ fn sanitize_name(name: String) -> String {
 
 /// Clean up generated test files.
 pub fn clean_generated(output_dir: String) -> Result(Nil, snag.Snag) {
-  let dir = output_dir <> "/gleedoc"
+  let dir = filepath.join(output_dir, "gleedoc")
   case simplifile.read_directory(dir) {
     Ok(files) -> {
       files
@@ -256,7 +258,7 @@ pub fn clean_generated(output_dir: String) -> Result(Nil, snag.Snag) {
         string.ends_with(f, "_gleedoc_test.gleam")
       })
       |> list.each(fn(f) {
-        let path = dir <> "/" <> f
+        let path = filepath.join(dir, f)
         let _ = simplifile.delete(path)
         Nil
       })
