@@ -171,6 +171,8 @@ src/
 gleam run -m prepare_tests && gleam test
 ```
 
+> ❗ Know issue: Some integration tests will fail on Windows due to line break incompatibility.
+
 ### Contributing
 
 Please kindly create an issue in your human voice, describe the feature request or bug clearly with reproduction steps, and ideally with a proposed solution **before** creating any PR.
@@ -202,7 +204,8 @@ Please kindly create an issue in your human voice, describe the feature request 
 | Incremental / cached generation        | ✅         | ✅          | ✅         | ❌          |
 | Source-mapped error reporting          | ✅         | ✅          | ✅         | ❌          |
 
-### Know Issues
+### ❗ Know Issues
 
 - [x] ~~Doesn't work on Windows due to different path separators~~
-- [ ] Generated tests will contain unused imports
+- [x] ~~Generated tests will contain unused imports~~
+- [ ] Test file generation is not OS-agnostic (some types of tests would fail on Windows)
