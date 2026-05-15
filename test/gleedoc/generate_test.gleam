@@ -1,4 +1,3 @@
-import glance
 import gleam/list
 import gleam/option.{Some}
 import gleam/string
@@ -22,6 +21,8 @@ pub fn generate_single_test_file_test() {
       target: Some("add"),
       file: "src/math.gleam",
       start_line: 1,
+      public_names: [],
+      module_imports: [],
     )
 
   let block =
@@ -30,7 +31,7 @@ pub fn generate_single_test_file_test() {
       code: "let result = add(1, 2)\nlet assert True = result == 3",
       source: doc,
       doc_line_offset: 3,
-      imports: [],
+      imports: ["import math.{add}"],
     )
 
   let config = generate.Config(output_dir: "test")
@@ -66,6 +67,8 @@ pub fn generate_test_with_block_imports_test() {
       target: Some("example"),
       file: "src/example.gleam",
       start_line: 1,
+      public_names: [],
+      module_imports: [],
     )
 
   let block =
@@ -109,6 +112,8 @@ pub fn generate_test_with_overlapping_block_imports_test() {
       target: Some("add"),
       file: "src/math.gleam",
       start_line: 1,
+      public_names: [],
+      module_imports: [],
     )
 
   let block1 =
@@ -134,6 +139,8 @@ pub fn generate_test_with_overlapping_block_imports_test() {
       target: Some("multiply"),
       file: "src/math.gleam",
       start_line: 10,
+      public_names: [],
+      module_imports: [],
     )
 
   let block2 =
@@ -158,6 +165,7 @@ pub fn generate_test_with_overlapping_block_imports_test() {
   // `dict.something` in the generated test bodies — the filter removes it.
   let dict_count =
     text
+    |> string.replace("\r\n", "\n")
     |> string.split("\n")
     |> list.filter(fn(line) { string.trim(line) == "import gleam/dict" })
     |> list.length
@@ -190,8 +198,10 @@ pub fn generate_includes_source_module_imports_test() {
         "```",
       ],
       target: Some("order_asc_by_name"),
-      file: "test/fixtures/bear.gleam",
+      file: "dev/fixtures/bear.gleam",
       start_line: 1,
+      public_names: ["Bear", "order_asc_by_name"],
+      module_imports: ["import gleam/order", "import gleam/string"],
     )
 
   let block =
@@ -247,8 +257,10 @@ pub fn generate_merges_snippet_and_module_imports_test() {
         "```",
       ],
       target: Some("order_asc_by_name"),
-      file: "test/fixtures/bear.gleam",
+      file: "dev/fixtures/bear.gleam",
       start_line: 1,
+      public_names: ["Bear", "order_asc_by_name"],
+      module_imports: ["import gleam/order", "import gleam/string"],
     )
 
   let block =
@@ -270,6 +282,7 @@ pub fn generate_merges_snippet_and_module_imports_test() {
   // gleam/order should appear exactly once
   let order_count =
     text
+    |> string.replace("\r\n", "\n")
     |> string.split("\n")
     |> list.filter(fn(line) {
       line |> string.trim |> string.starts_with("import gleam/order")

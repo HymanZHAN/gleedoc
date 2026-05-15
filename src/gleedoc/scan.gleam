@@ -4,6 +4,7 @@ import gleam/option.{None, Some}
 import gleam/result
 import gleam/set.{type Set}
 import gleam/string
+import gleedoc/line
 import snag
 
 // ---------------------------------------------------------------------------
@@ -92,7 +93,9 @@ fn if_public(publicity: glance.Publicity, name: String) -> Result(String, Nil) {
 /// Analyse a generated test source and remove any import statements whose
 /// module or unqualified names are never actually referenced in the code.
 /// Returns the cleaned source text, or the original if parsing fails.
-pub fn filter_unused_imports(source: String) -> String {
+pub fn remove_unused_imports(source: String) -> String {
+  // Normalise Windows line endings so all internal processing uses "\n".
+  let source = string.replace(source, "\r\n", "\n")
   case glance.module(source) {
     Error(_) -> source
     Ok(parsed) -> {
@@ -370,7 +373,7 @@ fn rebuild_source(original: String, kept_imports: List(String)) -> String {
     [] -> list.flatten([header, body])
     _ -> list.flatten([header, sorted_imports, [""], body])
   }
-  string.join(parts, "\n")
+  string.join(parts, line.separator())
 }
 
 fn is_import_line(line: String) -> Bool {

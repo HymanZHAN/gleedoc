@@ -16,6 +16,8 @@ pub fn extract_gleam_code_block_test() {
       target: Some("add"),
       file: "src/math.gleam",
       start_line: 1,
+      public_names: [],
+      module_imports: [],
     )
 
   let blocks = parse.extract_code_blocks([doc])
@@ -45,6 +47,8 @@ pub fn ignore_non_gleam_blocks_test() {
       target: Some("foo"),
       file: "src/foo.gleam",
       start_line: 1,
+      public_names: [],
+      module_imports: [],
     )
 
   let blocks =
@@ -65,6 +69,8 @@ pub fn no_code_blocks_test() {
       target: None,
       file: "src/foo.gleam",
       start_line: 1,
+      public_names: [],
+      module_imports: [],
     )
 
   let blocks = parse.extract_code_blocks([doc])
@@ -88,6 +94,8 @@ pub fn multiple_code_blocks_test() {
       target: Some("example"),
       file: "src/example.gleam",
       start_line: 1,
+      public_names: [],
+      module_imports: [],
     )
 
   let blocks = parse.extract_code_blocks([doc])
@@ -110,6 +118,8 @@ pub fn extract_imports_from_code_block_test() {
       target: Some("example"),
       file: "src/example.gleam",
       start_line: 1,
+      public_names: [],
+      module_imports: [],
     )
 
   let blocks = parse.extract_code_blocks([doc])

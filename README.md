@@ -171,7 +171,19 @@ src/
 gleam run -m prepare_tests && gleam test
 ```
 
-> ❗ Know issue: Some integration tests will fail on Windows due to line break incompatibility.
+You can also run the tests with the JavaScript target:
+
+```sh
+gleam run -m prepare_tests && gleam test -t javascript
+```
+
+### Windows
+
+On Windows, you probably want to configure `autocrlf` to be true **before** checking out this repo:
+
+```sh
+git config --global core.autocrlf true
+```
 
 ### Contributing
 
@@ -188,6 +200,8 @@ Please kindly create an issue in your human voice, describe the feature request 
 - [x] Use `glance` to extract public names for unqualified imports
 - [x] Cross-module imports: `import` statements in code blocks are merged inside the generated tests
 - [x] Single-command `gleam run -m gleedoc` CLI experience
+- [x] Reduce file reads by enriching `extract` results so subsequent steps don't need to read files from disk again
+- [x] Test file generation with OS-native line breaks: `\n` on Linux and Mac, `\r\n` on Windows
 
 ### Missing Features (compared to Rust, Elixir, and Python)
 
@@ -208,4 +222,4 @@ Please kindly create an issue in your human voice, describe the feature request 
 
 - [x] ~~Doesn't work on Windows due to different path separators~~
 - [x] ~~Generated tests will contain unused imports~~
-- [ ] Test file generation is not OS-agnostic (some types of tests would fail on Windows)
+- [x] ~~Test file generation is not OS-agnostic (some types of tests would fail on Windows)~~

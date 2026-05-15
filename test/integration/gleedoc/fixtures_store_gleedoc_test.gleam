@@ -3,7 +3,7 @@
 import fixtures/store.{get, insert, new}
 import gleam/option.{None, Some}
 
-// From: test/fixtures/store.gleam:21
+// From: dev/fixtures/store.gleam:21
 pub fn get_1_test() {
   let s = new() |> insert("x", 42)
   

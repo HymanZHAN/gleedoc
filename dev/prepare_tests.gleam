@@ -4,7 +4,7 @@ pub fn main() {
   let config =
     gleedoc.GleedocConfig(
       output_dir: "test/integration",
-      source_dir: "test/fixtures",
+      source_dir: "dev/fixtures",
     )
   let assert Ok(_) = gleedoc.run(config)
 }
