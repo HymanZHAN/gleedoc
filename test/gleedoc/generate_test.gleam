@@ -165,6 +165,7 @@ pub fn generate_test_with_overlapping_block_imports_test() {
   // `dict.something` in the generated test bodies — the filter removes it.
   let dict_count =
     text
+    |> string.replace("\r\n", "\n")
     |> string.split("\n")
     |> list.filter(fn(line) { string.trim(line) == "import gleam/dict" })
     |> list.length
@@ -281,6 +282,7 @@ pub fn generate_merges_snippet_and_module_imports_test() {
   // gleam/order should appear exactly once
   let order_count =
     text
+    |> string.replace("\r\n", "\n")
     |> string.split("\n")
     |> list.filter(fn(line) {
       line |> string.trim |> string.starts_with("import gleam/order")

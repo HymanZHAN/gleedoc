@@ -48,6 +48,7 @@ pub fn doc_blocks_from_file(
 
   let doc_blocks =
     content
+    |> string.replace("\r\n", "\n")
     |> string.split("\n")
     |> list.index_map(fn(line, index) { #(index + 1, line) })
     |> extract_blocks(file_path, public_names, module_imports)
