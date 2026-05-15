@@ -2,6 +2,7 @@ import gleam/list
 import gleam/option.{type Option}
 import gleam/result
 import gleam/string
+import gleedoc/scan
 import simplifile
 import snag
 
@@ -16,6 +17,10 @@ pub type DocBlock {
     file: String,
     /// The 1-based line number where the doc block starts.
     start_line: Int,
+    /// Public names exported by the source file (functions, types, constants).
+    public_names: List(String),
+    /// Top-level imports of the source file, formatted as import strings.
+    module_imports: List(String),
   )
 }
 
@@ -33,16 +38,29 @@ pub fn doc_blocks_from_file(
     }),
   )
 
+  let public_names =
+    scan.public_names(file_path, content)
+    |> result.unwrap([])
+
+  let module_imports =
+    scan.module_imports(file_path, content)
+    |> result.unwrap([])
+
   let doc_blocks =
     content
     |> string.split("\n")
     |> list.index_map(fn(line, index) { #(index + 1, line) })
-    |> extract_blocks(file_path)
+    |> extract_blocks(file_path, public_names, module_imports)
 
   Ok(doc_blocks)
 }
 
-fn extract_blocks(lines: List(#(Int, String)), file: String) -> List(DocBlock) {
+fn extract_blocks(
+  lines: List(#(Int, String)),
+  file: String,
+  public_names: List(String),
+  module_imports: List(String),
+) -> List(DocBlock) {
   let #(processed_doc_blocks, _trailing_doc) =
     list.fold(lines, #([], []), fn(state, item) {
       let #(processed_docs, current_doc) = state
@@ -85,6 +103,8 @@ fn extract_blocks(lines: List(#(Int, String)), file: String) -> List(DocBlock) {
                       target: target,
                       file: file,
                       start_line: start_line,
+                      public_names: public_names,
+                      module_imports: module_imports,
                     )
                   #([new_doc, ..processed_docs], [])
                 }

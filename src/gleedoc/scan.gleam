@@ -92,7 +92,7 @@ fn if_public(publicity: glance.Publicity, name: String) -> Result(String, Nil) {
 /// Analyse a generated test source and remove any import statements whose
 /// module or unqualified names are never actually referenced in the code.
 /// Returns the cleaned source text, or the original if parsing fails.
-pub fn filter_unused_imports(source: String) -> String {
+pub fn remove_unused_imports(source: String) -> String {
   case glance.module(source) {
     Error(_) -> source
     Ok(parsed) -> {

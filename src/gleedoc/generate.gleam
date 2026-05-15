@@ -45,9 +45,17 @@ pub fn generate_tests(
       }),
     )
 
+    let #(public_names, module_imports) = case file_blocks {
+      [first, ..] -> #(first.source.public_names, first.source.module_imports)
+      [] -> #([], [])
+    }
+
+    let auto_imports =
+      module_name |> unique_imports(public_names, module_imports)
+
     let block_imports = file_blocks |> list.flat_map(fn(b) { b.imports })
-    let auto_imports = unique_imports(file, module_name)
-    let all_imports = merge_imports(list.append(block_imports, auto_imports))
+    let all_imports =
+      block_imports |> list.append(auto_imports) |> merge_imports
 
     let test_functions = generate_test_functions(file_blocks)
 
@@ -58,7 +66,7 @@ pub fn generate_tests(
         "\n",
       )
 
-    let content = scan.filter_unused_imports(raw_content)
+    let content = scan.remove_unused_imports(raw_content)
 
     use _ <- result.try(
       simplifile.write(test_path, content)
@@ -187,29 +195,22 @@ fn list_find_import(
   list.find(imports, fn(imp) { imp.module == module })
 }
 
-fn unique_imports(file: String, module_name: String) -> List(String) {
-  // Try to read the source file and extract public names for unqualified imports.
-  // If parsing fails, fall back to a simple qualified import.
-  case simplifile.read(file) {
-    Ok(source) -> {
-      // Build the import for the target module itself.
-      // Unwrap to [] on error or empty, then format accordingly.
-      let names =
-        scan.public_names(file, source)
-        |> result.unwrap([])
-      let target_import = case names {
-        [] -> "import " <> module_name
-        _ -> "import " <> module_name <> ".{" <> string.join(names, ", ") <> "}"
-      }
-      // Also carry over the source module's own top-level imports so that
-      // doc examples can use them without having to restate them in the snippet.
-      let source_imports =
-        scan.module_imports(file, source)
-        |> result.unwrap([])
-      [target_import, ..source_imports]
-    }
-    Error(_) -> ["import " <> module_name]
+fn unique_imports(
+  module_name: String,
+  public_names: List(String),
+  module_imports: List(String),
+) -> List(String) {
+  let target_import = case public_names {
+    [] -> "import " <> module_name
+    _ ->
+      "import "
+      <> module_name
+      <> "."
+      <> "{"
+      <> string.join(public_names, ", ")
+      <> "}"
   }
+  [target_import, ..module_imports]
 }
 
 fn generate_test_functions(blocks: List(CodeBlock)) -> List(String) {
