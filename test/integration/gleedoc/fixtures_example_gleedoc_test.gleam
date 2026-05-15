@@ -3,25 +3,25 @@
 import fixtures/example.{User, add, find, greet, multiply}
 import gleam/dict
 
-// From: test/fixtures/example.gleam:6
+// From: dev/fixtures/example.gleam:6
 pub fn add_1_test() {
   let result = add(1, 2)
   assert result == 3
 }
 
-// From: test/fixtures/example.gleam:16
+// From: dev/fixtures/example.gleam:16
 pub fn multiply_2_test() {
   let result = multiply(3, 4)
   assert result == 12
 }
 
-// From: test/fixtures/example.gleam:26
+// From: dev/fixtures/example.gleam:26
 pub fn greet_3_test() {
   let msg = greet("Alice")
   assert msg == "Hello, Alice!"
 }
 
-// From: test/fixtures/example.gleam:40
+// From: dev/fixtures/example.gleam:40
 pub fn find_4_test() {
   let john = User("John", "Doe")
   let bill = User("Bill", "Wilson")

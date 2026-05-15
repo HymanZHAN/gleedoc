@@ -2,7 +2,7 @@ import gleam/list
 import gleam/option.{None, Some}
 import gleedoc/extract
 
-const fixture = "test/fixtures/example.gleam"
+const fixture = "dev/fixtures/example.gleam"
 
 pub fn extract_from_real_example_test() {
   let assert Ok(blocks) = extract.doc_blocks_from_file(fixture)

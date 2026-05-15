@@ -4,9 +4,9 @@ import gleedoc/line
 import gleedoc/scan
 import simplifile
 
-const bear_fixture = "test/fixtures/bear.gleam"
+const bear_fixture = "dev/fixtures/bear.gleam"
 
-const store_fixture = "test/fixtures/store.gleam"
+const store_fixture = "dev/fixtures/store.gleam"
 
 // ---------------------------------------------------------------------------
 // public_names
