@@ -4,7 +4,6 @@ import gleam/option.{None, Some}
 import gleam/result
 import gleam/set.{type Set}
 import gleam/string
-import gleedoc/line
 import snag
 
 // ---------------------------------------------------------------------------
@@ -373,7 +372,7 @@ fn rebuild_source(original: String, kept_imports: List(String)) -> String {
     [] -> list.flatten([header, body])
     _ -> list.flatten([header, sorted_imports, [""], body])
   }
-  string.join(parts, line.separator())
+  string.join(parts, "\n")
 }
 
 fn is_import_line(line: String) -> Bool {

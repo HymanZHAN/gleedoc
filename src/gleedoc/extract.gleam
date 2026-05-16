@@ -71,7 +71,11 @@ fn extract_blocks(
       case string.starts_with(trimmed, "///") {
         // Still inside a doc comment — append this line to the buffer.
         True -> {
-          let doc_line = trimmed |> string.drop_start(3) |> string.trim_start
+          let doc_line = trimmed |> string.drop_start(3)
+          let doc_line = case doc_line |> string.starts_with(" ") {
+            True -> doc_line |> string.drop_start(1)
+            False -> doc_line
+          }
           #(processed_docs, [#(line_no, doc_line), ..current_doc])
         }
 
