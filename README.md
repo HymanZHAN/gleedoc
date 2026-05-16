@@ -5,10 +5,9 @@
 
 A **doc test** library for Gleam, inspired by Rust and Elixir's doctest tooling.
 
-Doc tests let you write executable examples in your documentation comments (`///`).
-These examples are extracted, compiled, and run as part of your test suite, ensuring your documentation never goes out of date.
+Doc tests let you write executable examples in your documentation comments (`///`). These examples are extracted, compiled, and run as part of your test suite, ensuring your documentation never goes out of date.
 
-> Disclaimer: This project contains many LLM-generated code, and I used LLMs to do research and design. But I (as a Gleam amateur) have tried my best to review line by line, adjust and refactor.
+> 🚩 Disclaimer: This project contains substantial LLM-generated code, and I used LLMs for research and design. But I (as a Gleam amateur) have tried my best to review line by line, adjust, and refactor.
 
 ## How it works
 
@@ -179,15 +178,15 @@ gleam run -m prepare_tests && gleam test -t javascript
 
 ### Windows
 
-On Windows, you probably want to configure `autocrlf` to be true **before** checking out this repo:
+On Windows, you probably want to make sure that `autocrlf` is false **before** checking out this repo:
 
 ```sh
-git config --global core.autocrlf true
+git config --global core.autocrlf false
 ```
 
 ### Contributing
 
-Please kindly create an issue in your human voice, describe the feature request or bug clearly with reproduction steps, and ideally with a proposed solution **before** creating any PR.
+Please kindly create an issue in your human voice, clearly describe the feature request or bug with reproduction steps, and ideally include a proposed solution **before** creating any PR.
 
 ## Roadmap
 
@@ -223,3 +222,7 @@ Please kindly create an issue in your human voice, describe the feature request 
 - [x] ~~Doesn't work on Windows due to different path separators~~
 - [x] ~~Generated tests will contain unused imports~~
 - [x] ~~Test file generation is not OS-agnostic (some types of tests would fail on Windows)~~
+
+## The Name
+
+`gleeunit` for **unit** tests, `gleedoc` for **doc** tests! 😸
