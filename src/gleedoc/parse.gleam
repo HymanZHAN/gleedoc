@@ -20,11 +20,13 @@ pub type CodeBlock {
 }
 
 /// Extract all fenced code blocks from a list of doc blocks.
-pub fn extract_code_blocks(doc_blocks: List(DocBlock)) -> List(CodeBlock) {
-  doc_blocks |> list.flat_map(extract_code_blocks_from_doc)
+pub fn extract_gleam_blocks(doc_blocks: List(DocBlock)) -> List(CodeBlock) {
+  doc_blocks
+  |> list.flat_map(doc_block_to_code_block)
+  |> list.filter(fn(b) { string.lowercase(b.language) == "gleam" })
 }
 
-fn extract_code_blocks_from_doc(doc: DocBlock) -> List(CodeBlock) {
+fn doc_block_to_code_block(doc: DocBlock) -> List(CodeBlock) {
   let #(accumulated, current) =
     list.index_fold(doc.lines, #([], None), fn(state, line, line_no) {
       let #(accumulated, current) = state
@@ -84,9 +86,4 @@ fn extract_imports(code: String) -> #(List(String), String) {
     imports |> list.map(fn(pair) { pair.0 }),
     rest |> list.map(fn(pair) { pair.1 }) |> string.join("\n"),
   )
-}
-
-/// Filter code blocks to only those tagged as `gleam`.
-pub fn gleam_blocks(blocks: List(CodeBlock)) -> List(CodeBlock) {
-  list.filter(blocks, fn(b) { string.lowercase(b.language) == "gleam" })
 }
