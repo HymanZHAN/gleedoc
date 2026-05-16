@@ -71,10 +71,9 @@ pub fn generate_tests(
       })
 
     let all_imports =
-      [import_to_source]
-      |> list.append(preludes)
-      |> list.append(module_imports)
-      |> list.append(block_imports)
+      [preludes, module_imports, block_imports]
+      |> list.flatten
+      |> list.prepend(import_to_source)
       |> merge_imports
 
     let test_functions = generate_test_functions(code_blocks)
