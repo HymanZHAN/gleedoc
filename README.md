@@ -200,8 +200,8 @@ Please kindly create an issue in your human voice, clearly describe the feature 
 - [x] Cross-module imports: `import` statements in code blocks are merged inside the generated tests
 - [x] Single-command `gleam run -m gleedoc` CLI experience
 - [x] Reduce file reads by enriching `extract` results so subsequent steps don't need to read files from disk again
-- [x] Test file generation with OS-native line breaks: `\n` on Linux and Mac, `\r\n` on Windows
-
+- ~~[x] Test file generation with OS-native line breaks: `\n` on Linux and Mac, `\r\n` on Windows~~ (reverted)
+ 
 ### Missing Features (compared to Rust, Elixir, and Python)
 
 | Feature                                | Rust       | Elixir      | Python     | **gleedoc** |
