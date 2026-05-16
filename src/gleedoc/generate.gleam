@@ -66,7 +66,7 @@ pub fn generate_tests(
         "\n",
       )
 
-    let content = scan.remove_unused_imports(raw_content)
+    let content = scan.remove_unused_imports(raw_content) <> "\n"
 
     use _ <- result.try(
       simplifile.write(test_path, content)
@@ -230,18 +230,14 @@ fn generate_test_function(block: CodeBlock, index: Int) -> String {
     <> ":"
     <> int.to_string(block.source.start_line + block.doc_line_offset - 1)
 
-  let code = block.code |> string.trim
-
-  string.join(
-    [
-      "",
-      source_info,
-      "pub fn " <> test_func_name <> "() {",
-      "  " <> string.replace(code, "\n", "\n" <> "  "),
-      "}",
-    ],
-    "\n",
-  )
+  [
+    "",
+    source_info,
+    "pub fn " <> test_func_name <> "() {",
+    block.code |> to_function_body,
+    "}",
+  ]
+  |> string.join("\n")
 }
 
 /// Replace characters that aren't valid in function names
@@ -249,6 +245,19 @@ fn sanitize_name(name: String) -> String {
   name
   |> string.replace(".", "_")
   |> string.replace("-", "_")
+}
+
+fn to_function_body(code: String) -> String {
+  code
+  |> string.trim
+  |> string.split("\n")
+  |> list.map(fn(line) {
+    case string.trim(line) == "" {
+      True -> ""
+      False -> "  " <> line
+    }
+  })
+  |> string.join("\n")
 }
 
 /// Clean up generated test files.
