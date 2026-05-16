@@ -14,6 +14,8 @@ pub type Config {
   Config(
     /// Directory to write generated tests to, typically "test"
     output_dir: String,
+    /// A list of imports that will automatically be applied to every generated test file
+    preludes: List(String),
   )
 }
 
@@ -27,11 +29,10 @@ pub fn generate_tests(
 
   by_file
   |> list.try_map(fn(pair) {
-    let #(file, file_blocks) = pair
+    let #(file, code_blocks) = pair
     let test_file_name = test_file_name(file)
     let output_dir = filepath.join(config.output_dir, "gleedoc")
     let test_path = filepath.join(output_dir, test_file_name)
-    let module_name = module_name_from_file(file)
 
     use _ <- result.try(
       simplifile.create_directory_all(output_dir)
@@ -45,19 +46,38 @@ pub fn generate_tests(
       }),
     )
 
-    let #(public_names, module_imports) = case file_blocks {
+    // Imports defined in the source file
+    let #(public_names, module_imports) = case code_blocks {
       [first, ..] -> #(first.source.public_names, first.source.module_imports)
       [] -> #([], [])
     }
 
-    let auto_imports =
-      module_name |> unique_imports(public_names, module_imports)
+    // Imports to the source module, including all public names
+    let module_name = module_name_from_file(file)
+    let import_to_source =
+      module_name |> generate_import_to_source(public_names)
 
-    let block_imports = file_blocks |> list.flat_map(fn(b) { b.imports })
+    // Imports defined in each code block
+    let block_imports = code_blocks |> list.flat_map(fn(b) { b.imports })
+
+    // Pre-included imports defined by user
+    let preludes =
+      config.preludes
+      |> list.map(fn(p) {
+        case p {
+          "import " <> _ -> p
+          _ -> "import " <> p
+        }
+      })
+
     let all_imports =
-      block_imports |> list.append(auto_imports) |> merge_imports
+      [import_to_source]
+      |> list.append(preludes)
+      |> list.append(module_imports)
+      |> list.append(block_imports)
+      |> merge_imports
 
-    let test_functions = generate_test_functions(file_blocks)
+    let test_functions = generate_test_functions(code_blocks)
 
     let raw_content =
       string.join(
@@ -195,12 +215,11 @@ fn list_find_import(
   list.find(imports, fn(imp) { imp.module == module })
 }
 
-fn unique_imports(
+fn generate_import_to_source(
   module_name: String,
   public_names: List(String),
-  module_imports: List(String),
-) -> List(String) {
-  let target_import = case public_names {
+) -> String {
+  case public_names {
     [] -> "import " <> module_name
     _ ->
       "import "
@@ -210,7 +229,6 @@ fn unique_imports(
       <> string.join(public_names, ", ")
       <> "}"
   }
-  [target_import, ..module_imports]
 }
 
 fn generate_test_functions(blocks: List(CodeBlock)) -> List(String) {
