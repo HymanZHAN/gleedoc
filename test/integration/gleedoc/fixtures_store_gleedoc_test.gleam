@@ -6,7 +6,7 @@ import gleam/option.{None, Some}
 // From: dev/fixtures/store.gleam:21
 pub fn get_1_test() {
   let s = new() |> insert("x", 42)
-  
+
   assert get(s, "x") == Some(42)
   assert get(s, "y") == None
 }
