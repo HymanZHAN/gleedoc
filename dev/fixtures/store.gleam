@@ -17,7 +17,7 @@ pub fn insert(store: Store(v), key: String, value: v) -> Store(v) {
 }
 
 /// `gleam/int` is not imported anywhere in this file, so it has to be resolved 
-/// by preludes.
+/// by extra_imports.
 ///
 /// ```gleam
 /// let s = new() |> insert("x", 42)

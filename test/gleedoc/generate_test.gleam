@@ -34,7 +34,7 @@ pub fn generate_single_test_file_test() {
       imports: ["import math.{add}"],
     )
 
-  let config = generate.Config(output_dir: "test", preludes: [])
+  let config = generate.Config(output_dir: "test", extra_imports: [])
 
   let assert Ok(paths) = generate.generate_tests([block], config)
   assert list.length(paths) == 1
@@ -80,7 +80,7 @@ pub fn generate_test_with_block_imports_test() {
       imports: ["import gleam/dict"],
     )
 
-  let config = generate.Config(output_dir: "test", preludes: [])
+  let config = generate.Config(output_dir: "test", extra_imports: [])
 
   let assert Ok(paths) = generate.generate_tests([block], config)
   assert list.length(paths) == 1
@@ -152,7 +152,7 @@ pub fn generate_test_with_overlapping_block_imports_test() {
       imports: ["import gleam/dict", "import math.{multiply}"],
     )
 
-  let config = generate.Config(output_dir: "test", preludes: [])
+  let config = generate.Config(output_dir: "test", extra_imports: [])
 
   let assert Ok(paths) = generate.generate_tests([block1, block2], config)
   assert list.length(paths) == 1
@@ -213,7 +213,7 @@ pub fn generate_includes_source_module_imports_test() {
       imports: [],
     )
 
-  let config = generate.Config(output_dir: "test", preludes: [])
+  let config = generate.Config(output_dir: "test", extra_imports: [])
 
   let assert Ok(paths) = generate.generate_tests([block], config)
   let assert [path] = paths
@@ -272,7 +272,7 @@ pub fn generate_merges_snippet_and_module_imports_test() {
       imports: ["import gleam/order.{Lt}"],
     )
 
-  let config = generate.Config(output_dir: "test", preludes: [])
+  let config = generate.Config(output_dir: "test", extra_imports: [])
 
   let assert Ok(paths) = generate.generate_tests([block], config)
   let assert [path] = paths
@@ -303,7 +303,7 @@ pub fn generate_merges_snippet_and_module_imports_test() {
 /// (e.g. "gleam/dict") is used, it is automatically prefixed with
 /// "import ". Imports that are not referenced by the test code are still
 /// filtered out by remove_unused_imports.
-pub fn generate_with_preludes_test() {
+pub fn generate_with_extra_imports_test() {
   let doc =
     DocBlock(
       lines: [
@@ -330,7 +330,8 @@ pub fn generate_with_preludes_test() {
     )
 
   // Pass prelude as a raw module name — generate.gleam will prefix it.
-  let config = generate.Config(output_dir: "test", preludes: ["gleam/dict"])
+  let config =
+    generate.Config(output_dir: "test", extra_imports: ["gleam/dict"])
 
   let assert Ok(paths) = generate.generate_tests([block], config)
   let assert [path] = paths

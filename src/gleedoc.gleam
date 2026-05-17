@@ -9,14 +9,14 @@ import simplifile
 import snag
 
 /// Configuration for a gleedoc run.
-/// Example: `["gleam/int", "import gleam/otp/actor"]`
 pub type GleedocConfig {
   GleedocConfig(
-    // A list of imports that will automatically be applied to every generated test file
-    preludes: List(String),
-    // Directory to read source files from, typically "src"
+    /// A list of imports that will automatically be applied to every generated test file.
+    /// Example: `["gleam/int", "gleam/otp/actor"]`
+    extra_imports: List(String),
+    /// Directory to read source files from, typically "src"
     source_dir: String,
-    // Directory to write generated tests to, typically "test"
+    /// Directory to write generated tests to, typically "test"
     output_dir: String,
   )
 }
@@ -44,7 +44,10 @@ pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
     }
     blocks -> {
       let gen_config =
-        Config(output_dir: config.output_dir, preludes: config.preludes)
+        Config(
+          output_dir: config.output_dir,
+          extra_imports: config.extra_imports,
+        )
 
       // Clean old generated tests first
       use _ <- result.try(generate.clean_generated(config.output_dir))
@@ -60,7 +63,7 @@ pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
 /// CLI entry point. Reads gleam.toml to infer module/package names.
 pub fn main() -> Nil {
   let config =
-    GleedocConfig(output_dir: "test", source_dir: "src", preludes: [])
+    GleedocConfig(output_dir: "test", source_dir: "src", extra_imports: [])
 
   case run(config) {
     Ok(Nil) -> Nil

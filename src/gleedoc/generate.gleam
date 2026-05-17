@@ -15,7 +15,7 @@ pub type Config {
     /// Directory to write generated tests to, typically "test"
     output_dir: String,
     /// A list of imports that will automatically be applied to every generated test file
-    preludes: List(String),
+    extra_imports: List(String),
   )
 }
 
@@ -61,17 +61,11 @@ pub fn generate_tests(
     let block_imports = code_blocks |> list.flat_map(fn(b) { b.imports })
 
     // Pre-included imports defined by user
-    let preludes =
-      config.preludes
-      |> list.map(fn(p) {
-        case p {
-          "import " <> _ -> p
-          _ -> "import " <> p
-        }
-      })
+    let extra_imports =
+      config.extra_imports |> list.map(fn(p) { "import " <> p })
 
     let all_imports =
-      [preludes, module_imports, block_imports]
+      [extra_imports, module_imports, block_imports]
       |> list.flatten
       |> list.prepend(import_to_source)
       |> merge_imports
