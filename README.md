@@ -133,8 +133,9 @@ import gleedoc
 
 pub fn main() {
   let config = gleedoc.GleedocConfig(
-    output_dir: "test",
     source_dir: "src",
+    output_dir: "test",
+    extra_imports: [],
   )
 
   case gleedoc.run(config) {
@@ -143,6 +144,13 @@ pub fn main() {
   }
 }
 ```
+
+### The `GleedocConfig`
+
+- `source_dir`: The directory containing all the source files. Path resolution is relative to the project root. Default value: `src`.
+- `output_dir`: The directory where all the doc tests will be generated. Path resolution is relative to the project root. Default value: `test`.
+- `extra_imports`: A list of module names that will automatically be imported in every test. Unused imports will be removed in the final test. Example value: `["gleam/int", "gleam/otp/actor"]`.
+  - You can see it in action in [`dev/fixture/store.gleam`](dev/fixtures/store.gleam)
 
 ## Architecture
 
@@ -190,32 +198,41 @@ Please kindly create an issue in your human voice, clearly describe the feature 
 
 ## Roadmap
 
-### Implemented
+### Basics
 
-- [x] Extract `///` doc comments from source files
-- [x] Parse ` ```gleam ` fenced code blocks
-- [x] Generate compatible `gleeunit` test files
-- [x] Multi-file source discovery
-- [x] Use `glance` to extract public names for unqualified imports
-- [x] Cross-module imports: `import` statements in code blocks are merged inside the generated tests
+- [x] `gleeunit`-compatible test generation from ` ```gleam ` fenced code blocks in source files' doc comments
+- [x] Smart imports handling: import merging and import generation from source file's public names
 - [x] Single-command `gleam run -m gleedoc` CLI experience
-- [x] Reduce file reads by enriching `extract` results so subsequent steps don't need to read files from disk again
-- ~~[x] Test file generation with OS-native line breaks: `\n` on Linux and Mac, `\r\n` on Windows~~ (reverted)
- 
-### Missing Features (compared to Rust, Elixir, and Python)
+- ~~[x] Test file generation with OS-native line breaks: `\n` on Linux and Mac, `\r\n` on Windows~~ (reverted, as per [this comment](https://github.com/gleam-lang/gleam/pull/2762#pullrequestreview-1945733771))
+
+### Additional features before 1.0
+
+- [x] Offer an `extra_imports` option to apply extra imports to all generated test files
+- [ ] Source-mapped error reporting
+- [ ] Automatic formatting for generated tests
+- [ ] Single-command `gleam test` CLI experience without needing to run `gleam run -m gleedoc` before `gleam test`.
+- [ ] Module level doc tests
+- [ ] An `ignore` or `skip` attribute to exclude a code block from doc test generation
+
+#### Missing Features (compared to Rust, Elixir, and Python)
+
+📆 - Planned for 1.0
+🛑 - Not Planned for 1.0
+✅ - Implemented
 
 | Feature                                | Rust       | Elixir      | Python     | **gleedoc** |
 | -------------------------------------- | ---------- | ----------- | ---------- | ----------- |
-| `ignore` / skip attribute              | ✅         | ✅          | ✅         | ❌          |
-| `no_run` (compile only)                | ✅         | ❌          | ❌         | ❌          |
-| `should_panic`                         | ✅         | ❌          | ❌         | ❌          |
-| Hidden setup lines (`#`)               | ✅         | ❌          | ❌         | ❌          |
-| Output assertions (`// ->`)            | ❌         | ✅ (`iex>`) | ✅ (`>>>`) | ❌          |
-| Module-level doc tests                 | ✅ (`//!`) | ✅          | ✅         | ❌          |
-| `compile_fail`                         | ✅         | ❌          | ❌         | ❌          |
-| Multi-target (`erlang` / `javascript`) | ✅ (`cfg`) | ❌          | ❌         | ❌          |
-| Incremental / cached generation        | ✅         | ✅          | ✅         | ❌          |
-| Source-mapped error reporting          | ✅         | ✅          | ✅         | ❌          |
+| Single-command CLI experience          | ✅         | ✅          | ✅         | 📆          |
+| `ignore` / skip attribute              | ✅         | ✅          | ✅         | 📆          |
+| `no_run` (compile only)                | ✅         | ❌          | ❌         | 🛑          |
+| `should_panic`                         | ✅         | ❌          | ❌         | 🛑          |
+| Hidden setup lines (`#`)               | ✅         | ❌          | ❌         | 🛑          |
+| Output assertions (`// ->`)            | ❌         | ✅ (`iex>`) | ✅ (`>>>`) | 🛑          |
+| Module-level doc tests                 | ✅ (`//!`) | ✅          | ✅         | 📆          |
+| `compile_fail`                         | ✅         | ❌          | ❌         | 🛑          |
+| Multi-target (`erlang` / `javascript`) | ✅ (`cfg`) | ❌          | ❌         | ✅          |
+| Incremental / cached generation        | ✅         | ✅          | ✅         | 🛑          |
+| Source-mapped error reporting          | ✅         | ✅          | ✅         | 📆          |
 
 ### ❗ Know Issues
 
