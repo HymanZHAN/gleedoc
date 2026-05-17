@@ -69,10 +69,10 @@ pub fn main() -> Nil {
 }
 
 fn find_gleam_files(source_dir: String) -> Result(List(String), snag.Snag) {
-  go_find_gleam_files(source_dir, [])
+  find_gleam_files_loop(source_dir, [])
 }
 
-fn go_find_gleam_files(
+fn find_gleam_files_loop(
   dir: String,
   acc: List(String),
 ) -> Result(List(String), snag.Snag) {
@@ -98,7 +98,7 @@ fn go_find_gleam_files(
     )
 
     case is_dir {
-      True -> go_find_gleam_files(path, acc)
+      True -> find_gleam_files_loop(path, acc)
       False -> {
         case string.ends_with(path, ".gleam") {
           True -> Ok([path, ..acc])

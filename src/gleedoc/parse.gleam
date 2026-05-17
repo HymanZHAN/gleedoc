@@ -22,11 +22,11 @@ pub type CodeBlock {
 /// Extract all fenced code blocks from a list of doc blocks.
 pub fn extract_gleam_blocks(doc_blocks: List(DocBlock)) -> List(CodeBlock) {
   doc_blocks
-  |> list.flat_map(doc_block_to_code_block)
+  |> list.flat_map(doc_block_to_code_blocks)
   |> list.filter(fn(b) { string.lowercase(b.language) == "gleam" })
 }
 
-fn doc_block_to_code_block(doc: DocBlock) -> List(CodeBlock) {
+fn doc_block_to_code_blocks(doc: DocBlock) -> List(CodeBlock) {
   let #(accumulated, current) =
     list.index_fold(doc.lines, #([], None), fn(state, line, line_no) {
       let #(accumulated, current) = state
@@ -63,8 +63,9 @@ fn build_block(
   start: Int,
   doc: DocBlock,
 ) -> CodeBlock {
-  let code = list.reverse(code_lines) |> string.join("\n")
-  let #(imports, code) = extract_imports(code)
+  let #(imports, code) =
+    code_lines |> list.reverse |> string.join("\n") |> extract_imports
+
   CodeBlock(
     language: lang,
     code: code,

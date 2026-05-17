@@ -63,7 +63,8 @@ fn extract_blocks(
   module_imports: List(String),
 ) -> List(DocBlock) {
   let #(processed_doc_blocks, _trailing_doc) =
-    list.fold(lines, #([], []), fn(state, item) {
+    lines
+    |> list.fold(#([], []), fn(state, item) {
       let #(processed_docs, current_doc) = state
       let #(line_no, line) = item
       let trimmed = string.trim_start(line)
@@ -72,6 +73,9 @@ fn extract_blocks(
         // Still inside a doc comment — append this line to the buffer.
         True -> {
           let doc_line = trimmed |> string.drop_start(3)
+          // There is normally a space between `///` and the actual code, and we
+          // need to remove this space if it exists so that we don't need to
+          // trim the whole doc_line and can preserve the original indentation.
           let doc_line = case doc_line |> string.starts_with(" ") {
             True -> doc_line |> string.drop_start(1)
             False -> doc_line
@@ -93,21 +97,24 @@ fn extract_blocks(
                 // Non-blank, non-doc line after a doc block — finalize the block.
                 False -> {
                   let target = extract_definition_name(line)
-                  let start_line =
+
+                  let start_line_number =
                     current_doc
                     |> list.last
                     |> result.map(fn(pair) { pair.0 })
                     |> result.unwrap(line_no)
+
                   let doc_lines =
                     current_doc
                     |> list.reverse
                     |> list.map(fn(pair) { pair.1 })
+
                   let new_doc =
                     DocBlock(
                       lines: doc_lines,
                       target: target,
                       file: file,
-                      start_line: start_line,
+                      start_line: start_line_number,
                       public_names: public_names,
                       module_imports: module_imports,
                     )
