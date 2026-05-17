@@ -11,10 +11,13 @@ import snag
 /// Configuration for a gleedoc run.
 pub type GleedocConfig {
   GleedocConfig(
-    /// Directory to write generated tests to, typically "test"
-    output_dir: String,
+    /// A list of imports that will automatically be applied to every generated test file.
+    /// Example: `["gleam/int", "gleam/otp/actor"]`
+    extra_imports: List(String),
     /// Directory to read source files from, typically "src"
     source_dir: String,
+    /// Directory to write generated tests to, typically "test"
+    output_dir: String,
   )
 }
 
@@ -32,10 +35,7 @@ pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
   )
 
   // Extract gleam code blocks from doc comments
-  let code_blocks =
-    doc_blocks
-    |> parse.extract_code_blocks
-    |> parse.gleam_blocks
+  let code_blocks = parse.extract_gleam_blocks(doc_blocks)
 
   case code_blocks {
     [] -> {
@@ -43,7 +43,11 @@ pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
       Ok(Nil)
     }
     blocks -> {
-      let gen_config = Config(output_dir: config.output_dir)
+      let gen_config =
+        Config(
+          output_dir: config.output_dir,
+          extra_imports: config.extra_imports,
+        )
 
       // Clean old generated tests first
       use _ <- result.try(generate.clean_generated(config.output_dir))
@@ -58,7 +62,8 @@ pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
 
 /// CLI entry point. Reads gleam.toml to infer module/package names.
 pub fn main() -> Nil {
-  let config = GleedocConfig(output_dir: "test", source_dir: "src")
+  let config =
+    GleedocConfig(output_dir: "test", source_dir: "src", extra_imports: [])
 
   case run(config) {
     Ok(Nil) -> Nil
@@ -67,10 +72,10 @@ pub fn main() -> Nil {
 }
 
 fn find_gleam_files(source_dir: String) -> Result(List(String), snag.Snag) {
-  go_find_gleam_files(source_dir, [])
+  find_gleam_files_loop(source_dir, [])
 }
 
-fn go_find_gleam_files(
+fn find_gleam_files_loop(
   dir: String,
   acc: List(String),
 ) -> Result(List(String), snag.Snag) {
@@ -96,7 +101,7 @@ fn go_find_gleam_files(
     )
 
     case is_dir {
-      True -> go_find_gleam_files(path, acc)
+      True -> find_gleam_files_loop(path, acc)
       False -> {
         case string.ends_with(path, ".gleam") {
           True -> Ok([path, ..acc])

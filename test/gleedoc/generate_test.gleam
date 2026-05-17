@@ -34,7 +34,7 @@ pub fn generate_single_test_file_test() {
       imports: ["import math.{add}"],
     )
 
-  let config = generate.Config(output_dir: "test")
+  let config = generate.Config(output_dir: "test", extra_imports: [])
 
   let assert Ok(paths) = generate.generate_tests([block], config)
   assert list.length(paths) == 1
@@ -80,7 +80,7 @@ pub fn generate_test_with_block_imports_test() {
       imports: ["import gleam/dict"],
     )
 
-  let config = generate.Config(output_dir: "test")
+  let config = generate.Config(output_dir: "test", extra_imports: [])
 
   let assert Ok(paths) = generate.generate_tests([block], config)
   assert list.length(paths) == 1
@@ -152,7 +152,7 @@ pub fn generate_test_with_overlapping_block_imports_test() {
       imports: ["import gleam/dict", "import math.{multiply}"],
     )
 
-  let config = generate.Config(output_dir: "test")
+  let config = generate.Config(output_dir: "test", extra_imports: [])
 
   let assert Ok(paths) = generate.generate_tests([block1, block2], config)
   assert list.length(paths) == 1
@@ -213,7 +213,7 @@ pub fn generate_includes_source_module_imports_test() {
       imports: [],
     )
 
-  let config = generate.Config(output_dir: "test")
+  let config = generate.Config(output_dir: "test", extra_imports: [])
 
   let assert Ok(paths) = generate.generate_tests([block], config)
   let assert [path] = paths
@@ -272,7 +272,7 @@ pub fn generate_merges_snippet_and_module_imports_test() {
       imports: ["import gleam/order.{Lt}"],
     )
 
-  let config = generate.Config(output_dir: "test")
+  let config = generate.Config(output_dir: "test", extra_imports: [])
 
   let assert Ok(paths) = generate.generate_tests([block], config)
   let assert [path] = paths
@@ -292,6 +292,55 @@ pub fn generate_merges_snippet_and_module_imports_test() {
 
   // The merged line must contain the unqualified name
   assert string.contains(text, "import gleam/order.{Lt}")
+
+  // Clean up
+  let _ = simplifile.delete(path)
+  Nil
+}
+
+/// Prelude imports configured in GleedocConfig should automatically be
+/// included in every generated test file. When the raw module name form
+/// (e.g. "gleam/dict") is used, it is automatically prefixed with
+/// "import ". Imports that are not referenced by the test code are still
+/// filtered out by remove_unused_imports.
+pub fn generate_with_extra_imports_test() {
+  let doc =
+    DocBlock(
+      lines: [
+        "Creates a dictionary.",
+        "",
+        "```gleam",
+        "let d = dict.new()",
+        "```",
+      ],
+      target: Some("make_dict"),
+      file: "src/example.gleam",
+      start_line: 1,
+      public_names: [],
+      module_imports: [],
+    )
+
+  let block =
+    CodeBlock(
+      language: "gleam",
+      code: "let d = dict.new()",
+      source: doc,
+      doc_line_offset: 3,
+      imports: [],
+    )
+
+  // Pass prelude as a raw module name — generate.gleam will prefix it.
+  let config =
+    generate.Config(output_dir: "test", extra_imports: ["gleam/dict"])
+
+  let assert Ok(paths) = generate.generate_tests([block], config)
+  let assert [path] = paths
+
+  let assert Ok(text) = simplifile.read(path)
+
+  // The prelude import should appear because dict.new() is used.
+  assert string.contains(text, "import gleam/dict")
+  assert string.contains(text, "let d = dict.new()")
 
   // Clean up
   let _ = simplifile.delete(path)

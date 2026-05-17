@@ -1,10 +1,28 @@
 # Changelog
 
-## [unreleased]
+## [0.5.0] - 2026-05-17
+
+### <!-- 0 -->🚀 Features
+
+- Introduce new config option `preludes`
+
+### <!-- 2 -->🚜 Refactor
+
+- Minor clean up of `parse.gleam`
+- Replace sequential list.append with list.flatten
+- Minor adjustment and comments
+- Rename `preludes` to `extra_imports`
 
 ### <!-- 3 -->📚 Documentation
 
 - Fix incorrect test file name
+- Cross out irrelevant entry
+- CHANGELOG.md (with git-cliff)
+- Update doc on `GleedocConfig` and roadmap
+
+### <!-- 6 -->🧪 Testing
+
+- Adapt for `preludes`; new test cases
 
 ## [0.4.0] - 2026-05-16
 

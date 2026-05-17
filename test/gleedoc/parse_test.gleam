@@ -20,7 +20,7 @@ pub fn extract_gleam_code_block_test() {
       module_imports: [],
     )
 
-  let blocks = parse.extract_code_blocks([doc])
+  let blocks = parse.extract_gleam_blocks([doc])
   assert list.length(blocks) == 1
 
   let assert [block] = blocks
@@ -51,9 +51,7 @@ pub fn ignore_non_gleam_blocks_test() {
       module_imports: [],
     )
 
-  let blocks =
-    parse.extract_code_blocks([doc])
-    |> parse.gleam_blocks
+  let blocks = parse.extract_gleam_blocks([doc])
 
   assert list.length(blocks) == 1
 
@@ -73,7 +71,7 @@ pub fn no_code_blocks_test() {
       module_imports: [],
     )
 
-  let blocks = parse.extract_code_blocks([doc])
+  let blocks = parse.extract_gleam_blocks([doc])
   assert blocks == []
 }
 
@@ -98,7 +96,7 @@ pub fn multiple_code_blocks_test() {
       module_imports: [],
     )
 
-  let blocks = parse.extract_code_blocks([doc])
+  let blocks = parse.extract_gleam_blocks([doc])
   assert list.length(blocks) == 2
 }
 
@@ -122,7 +120,7 @@ pub fn extract_imports_from_code_block_test() {
       module_imports: [],
     )
 
-  let blocks = parse.extract_code_blocks([doc])
+  let blocks = parse.extract_gleam_blocks([doc])
   assert list.length(blocks) == 1
 
   let assert [block] = blocks

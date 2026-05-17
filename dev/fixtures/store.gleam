@@ -16,13 +16,19 @@ pub fn insert(store: Store(v), key: String, value: v) -> Store(v) {
   Store(data: dict.insert(store.data, key, value))
 }
 
-/// Look up a value in the store.
+/// `gleam/int` is not imported anywhere in this file, so it has to be resolved 
+/// by extra_imports.
 ///
 /// ```gleam
 /// let s = new() |> insert("x", 42)
 ///
 /// assert get(s, "x") == Some(42)
 /// assert get(s, "y") == None
+/// 
+/// assert get(s, "x")
+///   |> option.unwrap(42)
+///   |> int.to_string
+///   == "42"
 /// ```
 pub fn get(store: Store(v), key: String) -> Option(v) {
   case dict.get(store.data, key) {
