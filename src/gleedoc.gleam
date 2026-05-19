@@ -55,6 +55,9 @@ pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
       // Generate new test files
       use _ <- result.try(generate.generate_tests(blocks, gen_config))
 
+      // Format new test files
+      use _ <- result.try(generate.format_tests(config.output_dir))
+
       Ok(Nil)
     }
   }
