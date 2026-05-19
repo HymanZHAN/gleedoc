@@ -6,6 +6,7 @@ import gleam/result
 import gleam/string
 import gleedoc/parse.{type CodeBlock}
 import gleedoc/scan
+import shellout
 import simplifile
 import snag
 
@@ -94,6 +95,18 @@ pub fn generate_tests(
     )
 
     Ok(test_path)
+  })
+}
+
+pub fn format_tests(output_dir: String) -> Result(String, snag.Snag) {
+  shellout.command("gleam", ["format", output_dir], ".", [])
+  |> result.map_error(fn(err) {
+    snag.new(
+      "Failed to format test file: "
+      <> output_dir
+      <> " - "
+      <> string.inspect(err),
+    )
   })
 }
 

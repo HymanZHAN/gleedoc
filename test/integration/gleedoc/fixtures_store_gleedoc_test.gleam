@@ -22,7 +22,12 @@ pub fn module_2_test() {
 
   // `gleam/int` is not imported anywhere in this file, so it has to be
   // resolved by `extra_imports`.
-  assert s |> get("nothing") |> option.unwrap(42) |> int.to_string == "42"
+  assert s
+    |> get("nothing")
+    |> option.map(fn(_) { 20 })
+    |> option.unwrap(42)
+    |> int.to_string
+    == "41"
     as "dev/fixtures/store.gleam:12"
 }
 
