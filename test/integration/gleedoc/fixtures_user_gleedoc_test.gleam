@@ -2,9 +2,13 @@
 
 import fixtures/user.{greet}
 import gleam/option.{Some}
+import gleam/string
 
 // From: dev/fixtures/user.gleam:5
 pub fn greet_1_test() {
   let name = Some("Alice")
   assert greet(name) == "Hello, Alice!" as "dev/fixtures/user.gleam:5"
+
+  let assert [greet, ..] = string.split(greet(name), ",")
+  assert greet == "Hello" as "dev/fixtures/user.gleam:5"
 }

@@ -34,11 +34,9 @@ gleam add gleedoc --dev
 
 ## Usage
 
-Write doc comments with `gleam` code blocks in your source files:
+Write doc comments with `gleam` code blocks in your source files (e.g. `src/math.gleam`):
 
 ````gleam
-// src/math.gleam
-
 /// Adds two numbers together.
 ///
 /// ```gleam
@@ -63,10 +61,10 @@ This creates `test/gleedoc/math_gleedoc_test.gleam` containing:
 
 import math.{add}
 
-// From: src/math.gleam:4
+// From: src/math.gleam:3
 pub fn add_1_test() {
   let result = add(1, 2)
-  assert result == 3
+  assert result == 3 as "src/math.gleam:3"
 }
 ```
 
@@ -78,11 +76,12 @@ gleam test
 
 ### Imports in generated tests
 
-Each generated test file receives imports from three sources, merged and deduplicated automatically:
+Import resolutino should mostly work out of the box. Each generated test file receives imports from fource sources, merged and deduplicated automatically:
 
-1. **The source module itself** — `gleedoc` scans the module's public names with `glance` and generates a list of unqualified imports that include **all** public functions/types/constants, so you can call functions directly in your snippets.
-2. **The source module's own top-level imports** — any `import` statements at the top of the source file are carried over, so your snippets can use the same types and helpers the module itself uses without restating them.
-3. **Imports written inside the code block** — you can always add an explicit `import` line inside a snippet for anything extra.
+1. **The source module's own top-level imports** — any `import` statements at the top of the source file are carried over, so your snippets can use the same types and helpers the module itself uses without restating them.
+2. **Imports written inside the code block** — you can always add an explicit `import` line inside a snippet for anything extra.
+3. **The source module itself** — `gleedoc` scans the module's public names with `glance` and generates a list of unqualified imports that include **all** public functions/types/constants, so you can call functions directly in your snippets.
+4. **The `GleedocConfig`'s `extra_imports`**
 
 For example, given this source file `src/user.gleam`:
 
@@ -96,6 +95,9 @@ import gleam/option.{type Option}              // 1️⃣
 ///
 /// let name = Some("Alice")
 /// assert greet(name) == "Hello, Alice!"
+///
+/// let assert [greet, ..] = string.split(greet(name), ",")
+/// assert greet == "Hello"
 /// ```
 pub fn greet(name: Option(String)) -> String { // 3️⃣
   name
@@ -104,6 +106,16 @@ pub fn greet(name: Option(String)) -> String { // 3️⃣
 }
 ````
 
+And the following `GleedocConfig`:
+
+```gleam
+let config = gleedoc.GleedocConfig(
+  source_dir: "src",
+  output_dir: "test",
+  extra_imports: ["gleam/string"], // 4️⃣
+)
+```
+
 The generated test file `user_gleedoc_test.gleam` will contain imports merged from all three sources:
 
 ```gleam
@@ -111,11 +123,15 @@ The generated test file `user_gleedoc_test.gleam` will contain imports merged fr
 
 import fixtures/user.{greet}             // source module public definitions (3️⃣)
 import gleam/option.{type Option, Some}  // source module imports (1️⃣) + gleam code block imports (2️⃣)
+import gleam/string                      // `extra_imports` of `GleeddocConfig` (4️⃣)
 
 // From: test/fixtures/user.gleam:5
 pub fn greet_1_test() {
   let name = Some("Alice")
-  assert greet(name) == "Hello, Alice!"
+  assert greet(name) == "Hello, Alice!" as "dev/fixtures/user.gleam:5"
+
+  let assert [greet, ..] = string.split(greet(name), ",")
+  assert greet == "Hello" as "dev/fixtures/user.gleam:5"
 }
 ```
 
@@ -208,10 +224,10 @@ Please kindly create an issue in your human voice, clearly describe the feature 
 ### Additional features before 1.0
 
 - [x] Offer an `extra_imports` option to apply extra imports to all generated test files
-- [ ] Source-mapped error reporting
+- [x] Source-mapped error reporting
 - [ ] Automatic formatting for generated tests
 - [ ] Single-command `gleam test` CLI experience without needing to run `gleam run -m gleedoc` before `gleam test`.
-- [ ] Module level doc tests
+- [x] Module level doc tests
 - [ ] An `ignore` or `skip` attribute to exclude a code block from doc test generation
 
 #### Missing Features (compared to Rust, Elixir, and Python)
@@ -228,11 +244,11 @@ Please kindly create an issue in your human voice, clearly describe the feature 
 | `should_panic`                         | ✅         | ❌          | ❌         | 🛑          |
 | Hidden setup lines (`#`)               | ✅         | ❌          | ❌         | 🛑          |
 | Output assertions (`// ->`)            | ❌         | ✅ (`iex>`) | ✅ (`>>>`) | 🛑          |
-| Module-level doc tests                 | ✅ (`//!`) | ✅          | ✅         | 📆          |
+| Module-level doc tests                 | ✅ (`//!`) | ✅          | ✅         | ✅          |
 | `compile_fail`                         | ✅         | ❌          | ❌         | 🛑          |
 | Multi-target (`erlang` / `javascript`) | ✅ (`cfg`) | ❌          | ❌         | ✅          |
 | Incremental / cached generation        | ✅         | ✅          | ✅         | 🛑          |
-| Source-mapped error reporting          | ✅         | ✅          | ✅         | 📆          |
+| Source-mapped error reporting          | ✅         | ✅          | ✅         | ✅          |
 
 ### ❗ Know Issues
 

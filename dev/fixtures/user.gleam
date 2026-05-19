@@ -7,6 +7,9 @@ import gleam/option.{type Option}
 ///
 /// let name = Some("Alice")
 /// assert greet(name) == "Hello, Alice!"
+/// 
+/// let assert [greet, ..] = string.split(greet(name), ",")
+/// assert greet == "Hello"
 /// ```
 pub fn greet(name: Option(String)) -> String {
   name
