@@ -235,17 +235,18 @@ fn generate_test_function(block: CodeBlock, index: Int) -> String {
   let test_func_name =
     sanitize_name(target_name) <> "_" <> int.to_string(index + 1) <> "_test"
 
-  let source_info =
-    "// From: "
-    <> block.source.file
+  let detailed_target =
+    block.source.file
     <> ":"
     <> int.to_string(block.source.start_line + block.doc_line_offset - 1)
+
+  let source_info = "// From: " <> detailed_target
 
   [
     "",
     source_info,
     "pub fn " <> test_func_name <> "() {",
-    block.code |> to_function_body,
+    block.code |> to_function_body(detailed_target),
     "}",
   ]
   |> string.join("\n")
@@ -258,14 +259,19 @@ fn sanitize_name(name: String) -> String {
   |> string.replace("-", "_")
 }
 
-fn to_function_body(code: String) -> String {
+fn to_function_body(code: String, detailed_target: String) -> String {
   code
   |> string.trim
   |> string.split("\n")
   |> list.map(fn(line) {
-    case string.trim(line) == "" {
+    let line = case string.trim(line) == "" {
       True -> ""
       False -> "  " <> line
+    }
+
+    case line |> string.trim_start |> string.starts_with("assert") {
+      True -> line <> " as \"" <> detailed_target <> "\""
+      False -> line
     }
   })
   |> string.join("\n")

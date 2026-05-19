@@ -6,5 +6,5 @@ import gleam/option.{Some}
 // From: dev/fixtures/user.gleam:5
 pub fn greet_1_test() {
   let name = Some("Alice")
-  assert greet(name) == "Hello, Alice!"
+  assert greet(name) == "Hello, Alice!" as "dev/fixtures/user.gleam:5"
 }

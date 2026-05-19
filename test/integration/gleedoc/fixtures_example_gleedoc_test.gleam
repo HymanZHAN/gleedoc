@@ -6,19 +6,19 @@ import gleam/dict
 // From: dev/fixtures/example.gleam:6
 pub fn add_1_test() {
   let result = add(1, 2)
-  assert result == 3
+  assert result == 3 as "dev/fixtures/example.gleam:6"
 }
 
 // From: dev/fixtures/example.gleam:16
 pub fn multiply_2_test() {
   let result = multiply(3, 4)
-  assert result == 12
+  assert result == 12 as "dev/fixtures/example.gleam:16"
 }
 
 // From: dev/fixtures/example.gleam:26
 pub fn greet_3_test() {
   let msg = greet("Alice")
-  assert msg == "Hello, Alice!"
+  assert msg == "Hello, Alice!" as "dev/fixtures/example.gleam:26"
 }
 
 // From: dev/fixtures/example.gleam:40
@@ -30,6 +30,6 @@ pub fn find_4_test() {
     [#("bill_wilson", bill), #("john_doe", john)]
     |> dict.from_list
 
-  assert users |> find("hello") == User("", "")
-  assert users |> find("john_doe") == john
+  assert users |> find("hello") == User("", "") as "dev/fixtures/example.gleam:40"
+  assert users |> find("john_doe") == john as "dev/fixtures/example.gleam:40"
 }
