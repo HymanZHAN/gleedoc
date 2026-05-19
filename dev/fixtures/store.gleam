@@ -5,8 +5,8 @@
 //// ```gleam
 //// let s = store.new() |> store.insert("name", "Gleam")
 ////
-//// assert store.get(s, "name") == option.Some("Gleam")
-//// assert store.get(s, "age") == option.None
+//// assert s |> store.get("name") == option.Some("Gleam")
+//// assert s |> store.get("age") == option.None
 //// ```
 ////
 //// ```gleam
@@ -16,11 +16,7 @@
 ////
 //// // `gleam/int` is not imported anywhere in this file, so it has to be
 //// // resolved by `extra_imports`.
-//// assert s
-////   |> get("nothing")
-////   |> option.unwrap(42)
-////   |> int.to_string
-////   == "42"
+//// assert s |> get("nothing") |> option.unwrap(42) |> int.to_string == "42"
 //// ```
 ////
 

@@ -8,8 +8,8 @@ import gleam/option.{None, Some}
 pub fn module_1_test() {
   let s = store.new() |> store.insert("name", "Gleam")
 
-  assert store.get(s, "name") == option.Some("Gleam")
-  assert store.get(s, "age") == option.None
+  assert s |> store.get("name") == option.Some("Gleam")
+  assert s |> store.get("age") == option.None
 }
 
 // From: dev/fixtures/store.gleam:12
@@ -20,14 +20,10 @@ pub fn module_2_test() {
 
   // `gleam/int` is not imported anywhere in this file, so it has to be
   // resolved by `extra_imports`.
-  assert s
-    |> get("nothing")
-    |> option.unwrap(42)
-    |> int.to_string
-    == "42"
+  assert s |> get("nothing") |> option.unwrap(42) |> int.to_string == "42"
 }
 
-// From: dev/fixtures/store.gleam:48
+// From: dev/fixtures/store.gleam:44
 pub fn get_3_test() {
   let s = new() |> insert("x", 42)
 
