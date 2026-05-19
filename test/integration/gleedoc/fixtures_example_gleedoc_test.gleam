@@ -30,6 +30,7 @@ pub fn find_4_test() {
     [#("bill_wilson", bill), #("john_doe", john)]
     |> dict.from_list
 
-  assert users |> find("hello") == User("", "") as "dev/fixtures/example.gleam:40"
+  assert users |> find("hello") == User("", "")
+    as "dev/fixtures/example.gleam:40"
   assert users |> find("john_doe") == john as "dev/fixtures/example.gleam:40"
 }
