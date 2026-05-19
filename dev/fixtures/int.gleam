@@ -794,7 +794,7 @@ pub fn bitwise_shift_right(x: Int, y: Int) -> Int
 /// ```gleam
 /// let outcome =
 ///   range(from: 0, to: 3, with: "", run: fn(acc, i) { acc <> to_string(i) })
-/// assert outcome == "011"
+/// assert outcome == "012"
 /// ```
 ///
 /// ```gleam
