@@ -4,15 +4,33 @@ import fixtures/store.{get, insert, new}
 import gleam/int
 import gleam/option.{None, Some}
 
-// From: dev/fixtures/store.gleam:22
-pub fn get_1_test() {
+// From: dev/fixtures/store.gleam:5
+pub fn module_1_test() {
+  let s = store.new() |> store.insert("name", "Gleam")
+
+  assert store.get(s, "name") == option.Some("Gleam")
+  assert store.get(s, "age") == option.None
+}
+
+// From: dev/fixtures/store.gleam:12
+pub fn module_2_test() {
+  let s = store.new() |> store.insert("count", 5)
+
+  assert s |> store.get("count") |> option.unwrap(0) == 5
+
+  // `gleam/int` is not imported anywhere in this file, so it has to be
+  // resolved by `extra_imports`.
+  assert s
+    |> get("nothing")
+    |> option.unwrap(42)
+    |> int.to_string
+    == "42"
+}
+
+// From: dev/fixtures/store.gleam:48
+pub fn get_3_test() {
   let s = new() |> insert("x", 42)
 
   assert get(s, "x") == Some(42)
   assert get(s, "y") == None
-
-  assert get(s, "x")
-    |> option.unwrap(42)
-    |> int.to_string
-    == "42"
 }
