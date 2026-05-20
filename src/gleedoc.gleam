@@ -21,6 +21,17 @@ pub type GleedocConfig {
   )
 }
 
+/// CLI entry point
+pub fn main() -> Nil {
+  let config =
+    GleedocConfig(output_dir: "test", source_dir: "src", extra_imports: [])
+
+  case run(config) {
+    Ok(Nil) -> Nil
+    Error(snag) -> panic as snag.issue
+  }
+}
+
 /// Run gleedoc on a project, extracting doc tests from source files and generating
 /// test files in the output directory.
 pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
@@ -63,13 +74,9 @@ pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
   }
 }
 
-/// CLI entry point. Reads gleam.toml to infer module/package names.
-pub fn main() -> Nil {
-  let config =
-    GleedocConfig(output_dir: "test", source_dir: "src", extra_imports: [])
-
+pub fn run_with(config: GleedocConfig, test_main: fn() -> Nil) {
   case run(config) {
-    Ok(Nil) -> Nil
+    Ok(Nil) -> test_main()
     Error(snag) -> panic as snag.issue
   }
 }
