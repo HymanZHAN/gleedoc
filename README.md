@@ -7,7 +7,7 @@ A **doc test** library for Gleam, inspired by Rust and Elixir's doctest tooling.
 
 Doc tests let you write executable examples in your documentation comments (`///`). These examples are extracted, compiled, and run as part of your test suite, ensuring your documentation never goes out of date.
 
-> 🚩 Disclaimer: This project contains substantial LLM-generated code, and I used LLMs for research and design. But I (as a Gleam amateur) have tried my best to review line by line, adjust, and refactor.
+> 🚩 Disclaimer: This project contains substantial LLM-generated code, and I used LLMs for research and design. But I (as a Gleam amateur) have tried my best to review all the code line by line, adjust, and refactor.
 
 ## Installation
 
@@ -31,6 +31,7 @@ pub fn main() {
       output_dir: "test/integration",
       source_dir: "dev/fixtures",
       extra_imports: ["gleam/int", "gleam/string"],
+      preserve_tests: False,
     )
 
   config |> gleedoc.run_with(gleeunit.main)
@@ -116,6 +117,7 @@ pub fn main() {
       output_dir: "test/integration",
       source_dir: "dev/fixtures",
       extra_imports: ["gleam/int"],
+      preserve_tests: True,
     )
   let assert Ok(_) = gleedoc.run(config)
 }
@@ -166,6 +168,7 @@ let config = gleedoc.GleedocConfig(
   source_dir: "src",
   output_dir: "test",
   extra_imports: ["gleam/string"], // 4️⃣
+  preserve_tests: True,
 )
 ```
 
@@ -211,8 +214,22 @@ Any attributes other than `ignore` are accepted but currently have no effect. Th
 
 - `source_dir`: The directory containing all the source files. Path resolution is relative to the project root. Default value: `src`.
 - `output_dir`: The directory where all the doc tests will be generated. Path resolution is relative to the project root. Default value: `test`.
-- `extra_imports`: A list of module names that will automatically be imported in every test. Unused imports will be removed in the final test. Example value: `["gleam/int", "gleam/otp/actor"]`.
+- `extra_imports`: A list of module names that will automatically be imported in every test. Unused imports will be removed in the final test. Example: `["gleam/int", "gleam/otp/actor"]`.
   - You can see it in action in [`dev/fixture/store.gleam`](dev/fixtures/store.gleam)
+- `preserve_tests`: Whether to keep the generated test files in `output_dir` after the test run finishes. Default value: `False`. When using `gleedoc.run_with` together with `gleeunit`, leaving this as `False` keeps your `output_dir` clean between runs. If you are calling `gleedoc.run` programmatically (for example from a `dev/prepare_tests.gleam` script that only generates tests), set this to `True` so the generated files are not deleted afterwards.
+
+A `gleedoc.default()` helper is provided that returns a `GleedocConfig` with the following defaults:
+
+- `source_dir: "src"`
+- `output_dir: "test"`
+- `extra_imports: []`
+- `preserve_tests: False`
+
+You can use it as-is or override individual fields with record update syntax:
+
+```gleam
+let config = gleedoc.GleedocConfig(..gleedoc.default(), preserve_tests: True)
+```
 
 ## How it works
 
@@ -297,7 +314,7 @@ Please kindly create an issue in your human voice, clearly describe the feature 
 - [x] Single-command `gleam test` CLI experience without needing to run `gleam run -m gleedoc` before `gleam test`.
 - [x] Module level doc tests
 - [x] An `ignore` or `skip` attribute to exclude a code block from doc test generation
-- [ ] Offer a `clean_tests` option to control whether generated tests should be cleared after test run
+- [x] Offer a `preserve_tests` option to control whether generated tests should be preserved after test run
 
 #### Missing Features (compared to Rust, Elixir, and Python)
 

@@ -27,13 +27,29 @@ pub type GleedocConfig {
     source_dir: String,
     /// Directory to write generated tests to, typically "test"
     output_dir: String,
+    /// Whether to preserve generated test files in `output_dir` after doc tests finish.
+    /// If you are running `gleedoc.run` programmatically, please always set this to `True`.
+    preserve_tests: Bool,
+  )
+}
+
+/// Returns a `GleedocConfig` populated with sensible defaults:
+/// - `source_dir`: `"src"`
+/// - `output_dir`: `"test"`
+/// - `extra_imports`: `[]`
+/// - `preserve_tests`: `False`
+pub fn default() -> GleedocConfig {
+  GleedocConfig(
+    output_dir: "test",
+    source_dir: "src",
+    extra_imports: [],
+    preserve_tests: False,
   )
 }
 
 /// CLI entry point
 pub fn main() -> Nil {
-  let config =
-    GleedocConfig(output_dir: "test", source_dir: "src", extra_imports: [])
+  let config = default()
 
   case run(config) {
     Ok(Nil) -> Nil
@@ -63,16 +79,15 @@ pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
       Ok(Nil)
     }
     blocks -> {
+      // Clean old generated tests first
+      use _ <- result.try(generate.clean_generated(config.output_dir))
+
+      // Generate new test files
       let gen_config =
         Config(
           output_dir: config.output_dir,
           extra_imports: config.extra_imports,
         )
-
-      // Clean old generated tests first
-      use _ <- result.try(generate.clean_generated(config.output_dir))
-
-      // Generate new test files
       use _ <- result.try(generate.generate_tests(blocks, gen_config))
 
       // Format new test files
@@ -129,7 +144,28 @@ fn run_with_inner(
               ],
             )
           case result {
-            Ok(_) -> Nil
+            Ok(_) -> {
+              case config.preserve_tests {
+                False -> {
+                  let generated_dir =
+                    filepath.join(config.output_dir, "gleedoc")
+                  case simplifile.delete(generated_dir) {
+                    Ok(_) -> Nil
+                    Error(simplifile.Enoent) -> Nil
+                    Error(err) -> {
+                      io.println_error(
+                        "Warning: failed to clean generated tests at "
+                        <> generated_dir
+                        <> ": "
+                        <> simplifile.describe_error(err),
+                      )
+                      Nil
+                    }
+                  }
+                }
+                True -> Nil
+              }
+            }
             Error(#(status, message)) -> {
               case message {
                 "" -> Nil

@@ -6,6 +6,7 @@ pub fn main() {
       output_dir: "test/integration",
       source_dir: "dev/fixtures",
       extra_imports: ["gleam/int", "gleam/string"],
+      preserve_tests: True,
     )
   let assert Ok(_) = gleedoc.run(config)
 }
