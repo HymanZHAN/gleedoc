@@ -154,9 +154,7 @@ fn replace_version_line(
     True -> Ok(string.join(updated_lines, "\n"))
     False ->
       Error(
-        "Could not find a `version = ...` line in "
-        <> gleam_toml_path
-        <> ".",
+        "Could not find a `version = ...` line in " <> gleam_toml_path <> ".",
       )
   }
 }
@@ -189,12 +187,10 @@ fn git_commit() -> Result(Nil, String) {
 }
 
 fn git_tag(tag: String) -> Result(Nil, String) {
-  shellout.command(
-    run: "git",
-    with: ["tag", tag],
-    in: ".",
-    opt: [LetBeStdout, LetBeStderr],
-  )
+  shellout.command(run: "git", with: ["tag", tag], in: ".", opt: [
+    LetBeStdout,
+    LetBeStderr,
+  ])
   |> result.replace(Nil)
   |> result.map_error(fn(err) {
     let #(_status, message) = err

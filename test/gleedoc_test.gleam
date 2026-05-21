@@ -21,4 +21,3 @@ pub fn default_config_test() {
   assert config.extra_imports == []
   assert config.preserve_tests == False
 }
-
