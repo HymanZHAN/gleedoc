@@ -5,5 +5,5 @@
     "**/*.code-search": true,
     "**/build": true
   },
-  "cSpell.words": ["Gleedoc", "gleeunit", "simplifile"]
+  "cSpell.words": ["Gleedoc", "gleeunit", "shellout", "simplifile"]
 }

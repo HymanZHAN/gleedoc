@@ -1,12 +1,21 @@
+import argv
+import envoy
 import filepath
+import gleam/io
 import gleam/list
 import gleam/result
 import gleam/string
 import gleedoc/extract
 import gleedoc/generate.{Config}
 import gleedoc/parse
+import shellout.{LetBeStderr, LetBeStdout, SetEnvironment}
 import simplifile
 import snag
+
+/// Environment variable used to detect whether the current `gleam test`
+/// invocation is the initial test-generation pass (set) or the inner
+/// invocation that should actually compile and execute the tests (unset).
+const test_generation_running = "GLEEDOC_GENERATION_RUNNING"
 
 /// Configuration for a gleedoc run.
 pub type GleedocConfig {
@@ -74,10 +83,64 @@ pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
   }
 }
 
-pub fn run_with(config: GleedocConfig, test_main: fn() -> Nil) {
-  case run(config) {
-    Ok(Nil) -> test_main()
-    Error(snag) -> panic as snag.issue
+/// Run gleedoc and then execute the project's tests.
+///
+/// Because `gleam test` does not pick up newly-generated test files within the
+/// same compilation, this function uses a two-pass strategy controlled by the
+/// `GLEEDOC_GENERATION_RUNNING` environment variable:
+///
+/// 1. First pass (env var unset): generate the test files, set the env var,
+///    then re-invoke `gleam test` via `shellout`, forwarding any CLI
+///    arguments captured with `argv`. The original process does not run
+///    `test_main` itself.
+/// 2. Second pass (env var set): skip generation, unset the env var, and
+///    invoke `test_main` directly so the freshly-generated tests run.
+pub fn run_with(config: GleedocConfig, test_main: fn() -> Nil) -> Nil {
+  let forwarded_args = argv.load().arguments
+  run_with_inner(config, test_main, forwarded_args)
+}
+
+fn run_with_inner(
+  config: GleedocConfig,
+  test_main: fn() -> Nil,
+  forwarded_args: List(String),
+) -> Nil {
+  case envoy.get(test_generation_running) {
+    // Second pass: tests have been generated, just run them.
+    Ok(_) -> {
+      envoy.unset(test_generation_running)
+      test_main()
+    }
+
+    // First pass: generate tests then re-invoke `gleam test`.
+    Error(_) -> {
+      case run(config) {
+        Error(snag) -> panic as snag.issue
+        Ok(Nil) -> {
+          let result =
+            shellout.command(
+              run: "gleam",
+              with: ["test", ..forwarded_args],
+              in: ".",
+              opt: [
+                LetBeStdout,
+                LetBeStderr,
+                SetEnvironment([#(test_generation_running, "true")]),
+              ],
+            )
+          case result {
+            Ok(_) -> Nil
+            Error(#(status, message)) -> {
+              case message {
+                "" -> Nil
+                _ -> io.println(message)
+              }
+              shellout.exit(status)
+            }
+          }
+        }
+      }
+    }
   }
 }
 
