@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.6.0] - 2026-05-21
+
+### <!-- 0 -->🚀 Features
+
+- Extract module-level doc comment
+- Source-mapped doc test
+- Auto format generated test files
+- Auto format generated test files
+- Single `gleam test` experience
+- Support the `ignore` attribute
+- New `preserve_tests` config option
+
+### <!-- 1 -->🐛 Bug Fixes
+
+- Incompatible code format in doc
+- Incorrect doc test
+- Doc-test out-of-sync issue with env-var-guarded re-invocation of `gleam test`
+- Cli entry point should preserve tests
+
+### <!-- 3 -->📚 Documentation
+
+- Refine README
+- Update README
+
+### <!-- 6 -->🧪 Testing
+
+- Module-level doc extraction IT
+- Default helper UT
+
+### <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- Format code snippet in docs
+- Test formats
+- Prepare release script
+
 ## [0.5.0] - 2026-05-17
 
 ### <!-- 0 -->🚀 Features
