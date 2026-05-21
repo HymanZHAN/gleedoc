@@ -28,6 +28,7 @@ pub fn generate_single_test_file_test() {
   let block =
     CodeBlock(
       language: "gleam",
+      attributes: [],
       code: "let result = add(1, 2)\nlet assert True = result == 3",
       source: doc,
       doc_line_offset: 3,
@@ -74,6 +75,7 @@ pub fn generate_test_with_block_imports_test() {
   let block =
     CodeBlock(
       language: "gleam",
+      attributes: [],
       code: "let d = dict.new()",
       source: doc,
       doc_line_offset: 3,
@@ -119,6 +121,7 @@ pub fn generate_test_with_overlapping_block_imports_test() {
   let block1 =
     CodeBlock(
       language: "gleam",
+      attributes: [],
       code: "let result = add(1, 2)",
       source: doc1,
       doc_line_offset: 3,
@@ -146,6 +149,7 @@ pub fn generate_test_with_overlapping_block_imports_test() {
   let block2 =
     CodeBlock(
       language: "gleam",
+      attributes: [],
       code: "let result = multiply(3, 4)",
       source: doc2,
       doc_line_offset: 3,
@@ -207,6 +211,7 @@ pub fn generate_includes_source_module_imports_test() {
   let block =
     CodeBlock(
       language: "gleam",
+      attributes: [],
       code: "let alpha = Bear(id: 1, name: \"Alpha\", kind: \"Grizzly\", hibernating: False)\nlet beta  = Bear(id: 2, name: \"Beta\",  kind: \"Polar\",   hibernating: True)\nassert order_asc_by_name(alpha, beta) == order.Lt",
       source: doc,
       doc_line_offset: 3,
@@ -266,6 +271,7 @@ pub fn generate_merges_snippet_and_module_imports_test() {
   let block =
     CodeBlock(
       language: "gleam",
+      attributes: [],
       code: "let alpha = Bear(id: 1, name: \"Alpha\", kind: \"Grizzly\", hibernating: False)\nlet beta  = Bear(id: 2, name: \"Beta\",  kind: \"Polar\",   hibernating: True)\nassert order_asc_by_name(alpha, beta) == Lt",
       source: doc,
       doc_line_offset: 3,
@@ -323,6 +329,7 @@ pub fn generate_with_extra_imports_test() {
   let block =
     CodeBlock(
       language: "gleam",
+      attributes: [],
       code: "let d = dict.new()",
       source: doc,
       doc_line_offset: 3,

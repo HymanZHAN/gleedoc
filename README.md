@@ -190,6 +190,19 @@ pub fn greet_1_test() {
 
 If the same module is imported in multiple places (e.g. `gleam/option` appears in both the source file and a code block), the unqualified names from all of them are merged into a single import line.
 
+### Skipping code blocks
+
+You can skip individual code blocks by adding the `ignore` attribute after the language tag, separated by a comma:
+
+````gleam
+/// ```gleam,ignore
+/// // This block is parsed but no test will be generated for it.
+/// let x = some_unfinished_example()
+/// ```
+````
+
+Any attributes other than `ignore` are accepted but currently have no effect. The attribute is case-insensitive but not tolerant to whitespaces, so ` ```Gleam,Ignore ` works too, but ` ```Gleam , Ignore ` doesn't.
+
 > There are more examples in [`test/fixtures`](./test/fixtures/) and [`test/integration/gleedoc`](./test/integration/gleedoc/).
 
 ## API
@@ -283,7 +296,7 @@ Please kindly create an issue in your human voice, clearly describe the feature 
 - [x] Automatic formatting for generated tests
 - [x] Single-command `gleam test` CLI experience without needing to run `gleam run -m gleedoc` before `gleam test`.
 - [x] Module level doc tests
-- [ ] An `ignore` or `skip` attribute to exclude a code block from doc test generation
+- [x] An `ignore` or `skip` attribute to exclude a code block from doc test generation
 - [ ] Offer a `clean_tests` option to control whether generated tests should be cleared after test run
 
 #### Missing Features (compared to Rust, Elixir, and Python)
@@ -295,7 +308,7 @@ Please kindly create an issue in your human voice, clearly describe the feature 
 | Feature                                | Rust       | Elixir      | Python     | **gleedoc** |
 | -------------------------------------- | ---------- | ----------- | ---------- | ----------- |
 | Single-command CLI experience          | ✅         | ✅          | ✅         | 📆          |
-| `ignore` / skip attribute              | ✅         | ✅          | ✅         | 📆          |
+| `ignore` / skip attribute              | ✅         | ✅          | ✅         | ✅          |
 | `no_run` (compile only)                | ✅         | ❌          | ❌         | 🛑          |
 | `should_panic`                         | ✅         | ❌          | ❌         | 🛑          |
 | Hidden setup lines (`#`)               | ✅         | ❌          | ❌         | 🛑          |

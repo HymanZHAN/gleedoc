@@ -46,7 +46,16 @@ pub fn insert(store: Store(v), key: String, value: v) -> Store(v) {
 ///
 /// assert get(s, "x") == Some(42)
 /// assert get(s, "y") == None
+/// ```
+/// 
+/// The following example contains failing tests, but because it's ignored,
+/// the test suite will still pass.
+/// 
+/// ```gleam,ignore
+/// let s = new() |> insert("x", 42)
 ///
+/// assert get(s, "x") == Some(53)
+/// assert get(s, "y") == Some(42)
 /// ```
 pub fn get(store: Store(v), key: String) -> Option(v) {
   case dict.get(store.data, key) {
