@@ -49,7 +49,7 @@ pub fn default() -> GleedocConfig {
 
 /// CLI entry point
 pub fn main() -> Nil {
-  let config = default()
+  let config = GleedocConfig(..default(), preserve_tests: True)
 
   case run(config) {
     Ok(Nil) -> Nil
