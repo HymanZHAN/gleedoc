@@ -4,15 +4,37 @@ import fixtures/store.{get, insert, new}
 import gleam/int
 import gleam/option.{None, Some}
 
-// From: dev/fixtures/store.gleam:22
-pub fn get_1_test() {
-  let s = new() |> insert("x", 42)
+// From: dev/fixtures/store.gleam:5
+pub fn module_1_test() {
+  let s = store.new() |> store.insert("name", "Gleam")
 
-  assert get(s, "x") == Some(42)
-  assert get(s, "y") == None
+  assert s |> store.get("name") == option.Some("Gleam")
+    as "dev/fixtures/store.gleam:5"
+  assert s |> store.get("age") == option.None as "dev/fixtures/store.gleam:5"
+}
 
-  assert get(s, "x")
+// From: dev/fixtures/store.gleam:12
+pub fn module_2_test() {
+  let s = store.new() |> store.insert("count", 5)
+
+  assert s |> store.get("count") |> option.unwrap(0) == 5
+    as "dev/fixtures/store.gleam:12"
+
+  // `gleam/int` is not imported anywhere in this file, so it has to be
+  // resolved by `extra_imports`.
+  assert s
+    |> get("nothing")
+    |> option.map(fn(_) { 20 })
     |> option.unwrap(42)
     |> int.to_string
     == "42"
+    as "dev/fixtures/store.gleam:12"
+}
+
+// From: dev/fixtures/store.gleam:44
+pub fn get_3_test() {
+  let s = new() |> insert("x", 42)
+
+  assert get(s, "x") == Some(42) as "dev/fixtures/store.gleam:44"
+  assert get(s, "y") == None as "dev/fixtures/store.gleam:44"
 }

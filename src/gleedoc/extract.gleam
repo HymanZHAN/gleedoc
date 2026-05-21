@@ -1,5 +1,5 @@
 import gleam/list
-import gleam/option.{type Option}
+import gleam/option.{type Option, None, Some}
 import gleam/result
 import gleam/string
 import gleedoc/scan
@@ -57,6 +57,73 @@ pub fn doc_blocks_from_file(
 }
 
 fn extract_blocks(
+  lines: List(#(Int, String)),
+  file: String,
+  public_names: List(String),
+  module_imports: List(String),
+) -> List(DocBlock) {
+  // 1. Extract leading module doc (`////`) if present. It is always at the
+  // very top of the file, followed by a blank line.
+  let #(module_doc_lines, rest) =
+    list.split_while(lines, fn(item) {
+      item.1 |> string.trim_start |> string.starts_with("////")
+    })
+
+  let module_doc =
+    module_doc_lines |> extract_module_doc(file, public_names, module_imports)
+
+  // Skip any blank lines that follow the module doc block.
+  let rest = list.drop_while(rest, fn(item) { string.trim(item.1) == "" })
+
+  // 2. Extract definition docs (`///`) from the remaining lines.
+  let definition_docs =
+    rest |> extract_definition_docs(file, public_names, module_imports)
+
+  case module_doc {
+    Some(doc) -> [doc, ..definition_docs]
+    None -> definition_docs
+  }
+}
+
+fn extract_module_doc(
+  module_doc_lines: List(#(Int, String)),
+  file: String,
+  public_names: List(String),
+  module_imports: List(String),
+) -> Option(DocBlock) {
+  case module_doc_lines {
+    [] -> None
+    _ -> {
+      let start_line =
+        list.first(module_doc_lines)
+        |> result.map(fn(item) { item.0 })
+        |> result.unwrap(1)
+
+      let doc_lines =
+        module_doc_lines
+        |> list.map(fn(item) {
+          let #(_, line) = item
+          let trimmed = string.trim_start(line)
+          let raw = string.drop_start(trimmed, 4)
+          case string.starts_with(raw, " ") {
+            True -> string.drop_start(raw, 1)
+            False -> raw
+          }
+        })
+
+      Some(DocBlock(
+        lines: doc_lines,
+        target: None,
+        file: file,
+        start_line: start_line,
+        public_names: public_names,
+        module_imports: module_imports,
+      ))
+    }
+  }
+}
+
+fn extract_definition_docs(
   lines: List(#(Int, String)),
   file: String,
   public_names: List(String),
@@ -127,7 +194,7 @@ fn extract_blocks(
       }
     })
 
-  // End of file — trailing docs without a target are dropped (same as before).
+  // End of file — trailing docs without a target are dropped.
   list.reverse(processed_doc_blocks)
 }
 

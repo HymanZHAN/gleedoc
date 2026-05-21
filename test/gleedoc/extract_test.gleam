@@ -4,6 +4,8 @@ import gleedoc/extract
 
 const fixture = "dev/fixtures/example.gleam"
 
+const store_fixture = "dev/fixtures/store.gleam"
+
 pub fn extract_from_real_example_test() {
   let assert Ok(blocks) = extract.doc_blocks_from_file(fixture)
 
@@ -117,4 +119,20 @@ pub fn extract_no_doc_for_undocumented_type_test() {
 
   assert !list.contains(targets, Some("User"))
   assert !list.contains(targets, None)
+}
+
+pub fn extract_module_doc_test() {
+  let assert Ok(blocks) = extract.doc_blocks_from_file(store_fixture)
+
+  // The module doc (////) should appear as a block without a target.
+  let module_blocks = list.filter(blocks, fn(b) { b.target == None })
+  assert list.length(module_blocks) == 1
+
+  let assert [module_block] = module_blocks
+  assert module_block.start_line == 1
+
+  let assert [first_line, ..] = module_block.lines
+  assert first_line == "A simple key-value store backed by a dictionary."
+
+  assert module_block.target == None
 }

@@ -8,6 +8,9 @@ pub type CodeBlock {
   CodeBlock(
     /// The language tag, e.g. "gleam" or ""
     language: String,
+    /// Attributes following the language tag, e.g. `["ignore"]` for
+    /// ` ```gleam,ignore `. Always lowercased and trimmed.
+    attributes: List(String),
     /// The raw code inside the fence (without import statements)
     code: String,
     /// The source doc block this came from
@@ -20,10 +23,14 @@ pub type CodeBlock {
 }
 
 /// Extract all fenced code blocks from a list of doc blocks.
+///
+/// Only blocks tagged with `gleam` are kept, and any block with the `ignore`
+/// attribute (e.g. ` ```gleam,ignore `) is skipped.
 pub fn extract_gleam_blocks(doc_blocks: List(DocBlock)) -> List(CodeBlock) {
   doc_blocks
   |> list.flat_map(doc_block_to_code_blocks)
-  |> list.filter(fn(b) { string.lowercase(b.language) == "gleam" })
+  |> list.filter(fn(b) { b.language == "gleam" })
+  |> list.filter(fn(b) { !list.contains(b.attributes, "ignore") })
 }
 
 fn doc_block_to_code_blocks(doc: DocBlock) -> List(CodeBlock) {
@@ -58,21 +65,32 @@ fn doc_block_to_code_blocks(doc: DocBlock) -> List(CodeBlock) {
 }
 
 fn build_block(
-  lang: String,
+  info_string: String,
   code_lines: List(String),
   start: Int,
   doc: DocBlock,
 ) -> CodeBlock {
   let #(imports, code) =
     code_lines |> list.reverse |> string.join("\n") |> extract_imports
+  let #(language, attributes) = parse_info_string(info_string)
 
   CodeBlock(
-    language: lang,
+    language: language,
+    attributes: attributes,
     code: code,
     source: doc,
     doc_line_offset: start,
     imports: imports,
   )
+}
+
+/// Parse a fenced code block info string like `gleam,ignore` into a
+/// `#(language, attributes)` pair, e.g. `#("gleam", ["ignore"])`.
+fn parse_info_string(info_string: String) -> #(String, List(String)) {
+  case info_string |> string.lowercase |> string.split(",") {
+    [lang, ..attrs] -> #(lang, attrs)
+    [] -> #("", [])
+  }
 }
 
 /// Extract import statements from code and return them separately.
