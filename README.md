@@ -9,23 +9,6 @@ Doc tests let you write executable examples in your documentation comments (`///
 
 > 🚩 Disclaimer: This project contains substantial LLM-generated code, and I used LLMs for research and design. But I (as a Gleam amateur) have tried my best to review line by line, adjust, and refactor.
 
-## How it works
-
-1. **Extract** `///` doc comments from your `.gleam` source files.
-2. **Find** fenced code blocks tagged with `gleam` inside those comments.
-3. **Generate** test modules in your `test/` directory.
-4. **Run** the generated tests with `gleam test`.
-
-### How other languages do it
-
-| Language   | Approach                                                                      | Key Difference from Gleam                 |
-| ---------- | ----------------------------------------------------------------------------- | ----------------------------------------- |
-| **Rust**   | `cargo test` compiles ` ```rust ` blocks from `///` comments. No REPL needed. | Gleam follows this model closely.         |
-| **Elixir** | `doctest Module` parses `iex>` prompts from `@doc` strings.                   | Elixir has a REPL; Gleam does not.        |
-| **Python** | `doctest` parses `>>>` prompts from docstrings.                               | Python is interpreted; Gleam is compiled. |
-
-Because Gleam is a compiled language with no built-in REPL, **gleedoc** adopts Rust's approach: doc blocks are treated as standalone Gleam code that gets compiled and executed. If a block panics, the test fails.
-
 ## Installation
 
 ```sh
@@ -34,7 +17,53 @@ gleam add gleedoc --dev
 
 ## Usage
 
-Write doc comments with `gleam` code blocks in your source files (e.g. `src/math.gleam`):
+### Integration with `gleeunit`
+
+In your test entry file `test/<your_project>_test.gleam`, you can provide a `GleedocConfig` and use it with the `gleedoc.run_with` function. Take [`gleedoc_test.gleam`](./test/gleedoc_test.gleam) for example:
+
+```gleam
+import gleedoc
+import gleeunit
+
+pub fn main() {
+  let config =
+    gleedoc.GleedocConfig(
+      output_dir: "test/integration",
+      source_dir: "dev/fixtures",
+      extra_imports: ["gleam/int", "gleam/string"],
+    )
+
+  config |> gleedoc.run_with(gleeunit.main)
+}
+```
+
+After the configuration is in place, you can run your tests as usual:
+
+```sh
+gleam test
+```
+
+The corresponding doc tests will be generated in `<output_dir>/gleedoc` and be executed as part of the test run. For most projects, `source_dir` would be `src` and `output_dir` would be `test`.
+
+#### Caveats
+
+Gleam is a compiled language, and that means `gleam test` will need to compile all tests first before invoking `<your_project>_test.gleam`'s `main` function. Due to this limitation, `gleedoc.run_with` will actually generate the latest doc tests **and then** spawn another `gleam test` command to actually run the tests (credits to [testament](https://github.com/bwireman/testament) for working this out). Therefore, the terminal output might look a bit funny:
+
+```sh
+> gleam test
+   Compiled in 0.02s
+    Running gleedoc_test.main
+   Compiled in 0.02s          # <- duplicate output
+    Running gleedoc_test.main # <- duplicate output
+.............................................................................................................................
+125 passed, no failures
+```
+
+If you want a more explicit approach, you can try [creating your own test preparation script](#run-programmatically).
+
+### Run directly as a Gleam module
+
+Given a source file `src/math.gleam` with doc comments with `gleam` code blocks:
 
 ````gleam
 /// Adds two numbers together.
@@ -48,7 +77,7 @@ pub fn add(a: Int, b: Int) -> Int {
 }
 ````
 
-Then run gleedoc to generate tests:
+You can run `gleedoc` to generate tests:
 
 ```sh
 gleam run -m gleedoc
@@ -74,9 +103,33 @@ Now run your tests as usual:
 gleam test
 ```
 
+### Run programmatically
+
+You can also create a custom test preparation module in your `dev` directory. Take [`prepare_tests.gleam`](./dev/prepare_tests.gleam) for example:
+
+```gleam
+import gleedoc
+
+pub fn main() {
+  let config =
+    gleedoc.GleedocConfig(
+      output_dir: "test/integration",
+      source_dir: "dev/fixtures",
+      extra_imports: ["gleam/int"],
+    )
+  let assert Ok(_) = gleedoc.run(config)
+}
+```
+
+And now you can run your test generation script together with `gleam test` like so:
+
+```sh
+gleam run -m prepare_tests && gleam test
+```
+
 ### Imports in generated tests
 
-Import resolutino should mostly work out of the box. Each generated test file receives imports from fource sources, merged and deduplicated automatically:
+Import resolution should mostly work out of the box. Each generated test file receives imports from four sources, merged and deduplicated automatically:
 
 1. **The source module's own top-level imports** — any `import` statements at the top of the source file are carried over, so your snippets can use the same types and helpers the module itself uses without restating them.
 2. **Imports written inside the code block** — you can always add an explicit `import` line inside a snippet for anything extra.
@@ -123,7 +176,7 @@ The generated test file `user_gleedoc_test.gleam` will contain imports merged fr
 
 import fixtures/user.{greet}             // source module public definitions (3️⃣)
 import gleam/option.{type Option, Some}  // source module imports (1️⃣) + gleam code block imports (2️⃣)
-import gleam/string                      // `extra_imports` of `GleeddocConfig` (4️⃣)
+import gleam/string                      // `extra_imports` of `GleedocConfig` (4️⃣)
 
 // From: test/fixtures/user.gleam:5
 pub fn greet_1_test() {
@@ -141,34 +194,21 @@ If the same module is imported in multiple places (e.g. `gleam/option` appears i
 
 ## API
 
-You can also use gleedoc programmatically from your test suite:
-
-```gleam
-// test/gleedoc_setup.gleam
-import gleedoc
-
-pub fn main() {
-  let config = gleedoc.GleedocConfig(
-    source_dir: "src",
-    output_dir: "test",
-    extra_imports: [],
-  )
-
-  case gleedoc.run(config) {
-    Ok(Nil) -> Nil
-    Error(snag) -> panic as snag.issue
-  }
-}
-```
-
-### The `GleedocConfig`
+### `GleedocConfig`
 
 - `source_dir`: The directory containing all the source files. Path resolution is relative to the project root. Default value: `src`.
 - `output_dir`: The directory where all the doc tests will be generated. Path resolution is relative to the project root. Default value: `test`.
 - `extra_imports`: A list of module names that will automatically be imported in every test. Unused imports will be removed in the final test. Example value: `["gleam/int", "gleam/otp/actor"]`.
   - You can see it in action in [`dev/fixture/store.gleam`](dev/fixtures/store.gleam)
 
-## Architecture
+## How it works
+
+1. **Extract** `///` doc comments from your `.gleam` source files.
+2. **Find** fenced code blocks tagged with `gleam` inside those comments.
+3. **Generate** test modules from gleam code blocks in your `test/` directory.
+4. **Run** the generated tests with `gleam test`.
+
+### Architecture
 
 ```
 src/
@@ -182,22 +222,35 @@ src/
 
 ### Key dependencies
 
-| Package      | Role                       |
-| ------------ | -------------------------- |
-| `glance`     | Gleam source parser        |
-| `simplifile` | Cross-target file I/O      |
-| `snag`       | Lightweight error handling |
+| Package      | Role                            |
+| ------------ | ------------------------------- |
+| `glance`     | Gleam source parser             |
+| `simplifile` | Cross-target file I/O           |
+| `snag`       | Lightweight error handling      |
+| `shellout`   | Cross-platform shell operations |
+| `argv`       | CLI arguments parsing           |
+| `envoy`      | Environment variables           |
+
+### How other languages do it
+
+| Language   | Approach                                                                      | Key Difference from Gleam                 |
+| ---------- | ----------------------------------------------------------------------------- | ----------------------------------------- |
+| **Rust**   | `cargo test` compiles ` ```rust ` blocks from `///` comments. No REPL needed. | Gleam follows this model closely.         |
+| **Elixir** | `doctest Module` parses `iex>` prompts from `@doc` strings.                   | Elixir has a REPL; Gleam does not.        |
+| **Python** | `doctest` parses `>>>` prompts from docstrings.                               | Python is interpreted; Gleam is compiled. |
+
+Because Gleam is a compiled language with no built-in REPL, **gleedoc** adopts Rust's approach: doc blocks are treated as standalone Gleam code that gets compiled and executed. If a block panics, the test fails.
 
 ## Development
 
 ```sh
-gleam run -m prepare_tests && gleam test
+gleam test
 ```
 
 You can also run the tests with the JavaScript target:
 
 ```sh
-gleam run -m prepare_tests && gleam test -t javascript
+gleam test -t javascript
 ```
 
 ### Windows
@@ -207,6 +260,8 @@ On Windows, you probably want to make sure that `autocrlf` is false **before** c
 ```sh
 git config --global core.autocrlf false
 ```
+
+`gleam format` always format with the `\n` line break, so checking out with `\r\n` is not ideal.
 
 ### Contributing
 
@@ -225,16 +280,17 @@ Please kindly create an issue in your human voice, clearly describe the feature 
 
 - [x] Offer an `extra_imports` option to apply extra imports to all generated test files
 - [x] Source-mapped error reporting
-- [ ] Automatic formatting for generated tests
-- [ ] Single-command `gleam test` CLI experience without needing to run `gleam run -m gleedoc` before `gleam test`.
+- [x] Automatic formatting for generated tests
+- [x] Single-command `gleam test` CLI experience without needing to run `gleam run -m gleedoc` before `gleam test`.
 - [x] Module level doc tests
 - [ ] An `ignore` or `skip` attribute to exclude a code block from doc test generation
+- [ ] Offer a `clean_tests` option to control whether generated tests should be cleared after test run
 
 #### Missing Features (compared to Rust, Elixir, and Python)
 
-📆 - Planned for 1.0
-🛑 - Not Planned for 1.0
-✅ - Implemented
+- 📆 - Planned for 1.0
+- 🛑 - Not Planned for 1.0
+- ✅ - Implemented
 
 | Feature                                | Rust       | Elixir      | Python     | **gleedoc** |
 | -------------------------------------- | ---------- | ----------- | ---------- | ----------- |
@@ -255,6 +311,10 @@ Please kindly create an issue in your human voice, clearly describe the feature 
 - [x] ~~Doesn't work on Windows due to different path separators~~
 - [x] ~~Generated tests will contain unused imports~~
 - [x] ~~Test file generation is not OS-agnostic (some types of tests would fail on Windows)~~
+
+## Prior art
+
+- **[testament](https://github.com/bwireman/testament)** — a Gleam doc test library that pioneered the env-var-guarded re-invocation of `gleam test` to work around the CLI's limitation. Gleedoc's `run_with` follows the same pattern, and the project is better for it. Thank you @bwireman!
 
 ## The Name
 
