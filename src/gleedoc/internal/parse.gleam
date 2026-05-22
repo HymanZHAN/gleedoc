@@ -1,7 +1,7 @@
 import gleam/list
 import gleam/option.{None, Some}
 import gleam/string
-import gleedoc/extract.{type DocBlock}
+import gleedoc/internal/extract.{type DocBlock}
 
 /// Represents a fenced code block extracted from a doc comment.
 pub type CodeBlock {

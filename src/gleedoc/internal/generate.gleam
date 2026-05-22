@@ -4,8 +4,8 @@ import gleam/list
 import gleam/option
 import gleam/result
 import gleam/string
-import gleedoc/parse.{type CodeBlock}
-import gleedoc/scan
+import gleedoc/internal/parse.{type CodeBlock}
+import gleedoc/internal/scan
 import shellout
 import simplifile
 import snag

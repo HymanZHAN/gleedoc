@@ -1,6 +1,6 @@
 import gleam/list
 import gleam/string
-import gleedoc/scan
+import gleedoc/internal/scan
 import simplifile
 
 const bear_fixture = "dev/fixtures/bear.gleam"

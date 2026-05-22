@@ -1,4 +1,4 @@
-import gleedoc/generate
+import gleedoc/internal/generate
 import simplifile
 
 pub fn clean_generated_test() {

@@ -1,9 +1,9 @@
 import gleam/list
 import gleam/option.{Some}
 import gleam/string
-import gleedoc/extract.{DocBlock}
-import gleedoc/generate
-import gleedoc/parse.{CodeBlock}
+import gleedoc/internal/extract.{DocBlock}
+import gleedoc/internal/generate
+import gleedoc/internal/parse.{CodeBlock}
 import simplifile
 
 pub fn generate_single_test_file_test() {

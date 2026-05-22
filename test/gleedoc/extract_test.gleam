@@ -1,6 +1,6 @@
 import gleam/list
 import gleam/option.{None, Some}
-import gleedoc/extract
+import gleedoc/internal/extract
 
 const fixture = "dev/fixtures/example.gleam"
 

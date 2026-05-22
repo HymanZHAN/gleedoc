@@ -5,9 +5,9 @@ import gleam/io
 import gleam/list
 import gleam/result
 import gleam/string
-import gleedoc/extract
-import gleedoc/generate.{Config}
-import gleedoc/parse
+import gleedoc/internal/extract
+import gleedoc/internal/generate.{Config}
+import gleedoc/internal/parse
 import shellout.{LetBeStderr, LetBeStdout, SetEnvironment}
 import simplifile
 import snag

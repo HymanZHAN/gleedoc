@@ -2,7 +2,7 @@ import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
 import gleam/string
-import gleedoc/scan
+import gleedoc/internal/scan
 import simplifile
 import snag
 

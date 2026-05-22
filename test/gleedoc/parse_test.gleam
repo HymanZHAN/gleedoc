@@ -1,7 +1,7 @@
 import gleam/list
 import gleam/option.{None, Some}
-import gleedoc/extract.{DocBlock}
-import gleedoc/parse
+import gleedoc/internal/extract.{DocBlock}
+import gleedoc/internal/parse
 
 pub fn extract_gleam_code_block_test() {
   let doc =
