@@ -126,3 +126,15 @@ You can skip individual code blocks by adding the `ignore` attribute after the l
 Any attributes other than `ignore` are accepted but currently have no effect. The attribute is case-insensitive but not tolerant to whitespaces, so ` ```Gleam,Ignore ` works too, but ` ```Gleam , Ignore ` doesn't.
 
 > There are more examples in [`test/fixtures`](./test/fixtures/) and [`test/integration/gleedoc`](./test/integration/gleedoc/).
+
+## Deno
+
+If you want to run your tests with the `deno` runtime, add this section to your `gleam.toml` so that you don't get prompted for authorization on every run:
+
+```toml
+[javascript.deno]
+allow_read = true
+allow_write = true
+allow_env = ["GLEEDOC_GENERATION_RUNNING", "PATHEXT", "PATH"]
+allow_run = ["gleam"]
+```
