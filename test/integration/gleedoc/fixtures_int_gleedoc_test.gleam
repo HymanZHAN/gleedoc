@@ -404,8 +404,8 @@ pub fn range_78_test() {
   assert outcome == "012" as "dev/fixtures/int.gleam:794"
 }
 
-// From: dev/fixtures/int.gleam:799
+// From: dev/fixtures/int.gleam:802
 pub fn range_79_test() {
   assert range(from: 1, to: -2, with: [], run: list.prepend) == [-1, 0, 1]
-    as "dev/fixtures/int.gleam:799"
+    as "dev/fixtures/int.gleam:802"
 }

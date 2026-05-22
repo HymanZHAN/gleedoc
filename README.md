@@ -242,12 +242,13 @@ let config = gleedoc.GleedocConfig(..gleedoc.default(), preserve_tests: True)
 
 ```
 src/
-  gleedoc.gleam           # Main entry point and CLI
+  gleedoc.gleam           # Main entry point, public functions and types
   gleedoc/
-    extract.gleam         # Line-based doc comment extraction
-    parse.gleam           # Markdown code block parsing
-    generate.gleam        # Test file generation
-    scan.gleam            # Public names and imports extraction with glance
+    internal/
+      extract.gleam         # Line-based doc comment extraction
+      parse.gleam           # Markdown code block parsing
+      generate.gleam        # Test file generation
+      scan.gleam            # Public names and imports extraction with glance
 ```
 
 ### Key dependencies
