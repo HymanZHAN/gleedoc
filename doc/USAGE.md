@@ -2,7 +2,7 @@
 
 ## Integration with `gleeunit`
 
-In your test entry file `test/<your_project>_test.gleam`, you can provide a `GleedocConfig` and use it with the `gleedoc.run_with` function. Take [`gleedoc_test.gleam`](./test/gleedoc_test.gleam) for example:
+In your test entry file `test/<your_project>_test.gleam`, you can directly construct a `GleedocConfig` and use it with the `gleedoc.run_with` function. Take [`gleedoc_test.gleam`](./test/gleedoc_test.gleam) for example:
 
 ```gleam
 import gleedoc
@@ -19,6 +19,23 @@ pub fn main() {
     )
 
   config |> gleedoc.run_with(gleeunit.main)
+}
+```
+
+Or you can use the builder API:
+
+```gleam
+import gleedoc
+import gleeunit
+
+pub fn main() {
+  gleedoc.new()
+  |> gleedoc.with_source_dir("dev/fixtures")
+  |> gleedoc.with_output_dir("test/integration")
+  |> gleedoc.add_extra_import("gleam/int")
+  |> gleedoc.add_extra_import("gleam/string")
+  |> gleedoc.with_preserve_tests(True)
+  |> gleedoc.run_with(gleeunit.main)
 }
 ```
 
@@ -96,15 +113,12 @@ You can also create a custom test preparation module in your `dev` directory. Ta
 import gleedoc
 
 pub fn main() {
-  let config =
-    gleedoc.GleedocConfig(
-      output_dir: "test/integration",
-      source_dir: "dev/fixtures",
-      extra_imports: ["gleam/int"],
-      preserve_tests: True,
-      source_mapped_errors: True,
-    )
-  let assert Ok(_) = gleedoc.run(config)
+  gleedoc.new()
+  |> gleedoc.with_source_dir("dev/fixtures")
+  |> gleedoc.with_output_dir("test/integration")
+  |> gleedoc.with_extra_imports(["gleam/int", "gleam/string"])
+  |> gleedoc.with_preserve_tests(True)
+  |> gleedoc.run()
 }
 ```
 

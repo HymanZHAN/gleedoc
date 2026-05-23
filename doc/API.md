@@ -25,6 +25,32 @@ You can use it as-is or override individual fields with record update syntax:
 let config = gleedoc.GleedocConfig(..gleedoc.default(), preserve_tests: True)
 ```
 
+## Builder API
+
+A set of builder-style APIs is provided for more fluent configuration customization.
+
+- `new`
+- `with_extra_imports`
+- `with_output_dir`
+- `with_preserve_tests`
+- `with_source_dir`
+- `with_source_mapped_errors`
+
+### Example
+
+```gleam
+import gleedoc
+import gleeunit
+
+pub fn main() {
+  gleedoc.new()
+  |> gleedoc.with_extra_imports(["gleam/int", "gleam/string"])
+  |> gleedoc.with_preserve_tests(True)
+  |> gleedoc.with_source_mapped_errors(False)
+  |> gleedoc.run_with(gleeunit.main)
+}
+```
+
 ## `run_with`
 
 Run `gleedoc` with `gleeunit` tests (or any other test functions you want to run).

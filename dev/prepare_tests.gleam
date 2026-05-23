@@ -1,13 +1,10 @@
 import gleedoc
 
 pub fn main() {
-  let config =
-    gleedoc.GleedocConfig(
-      output_dir: "test/integration",
-      source_dir: "dev/fixtures",
-      extra_imports: ["gleam/int", "gleam/string"],
-      preserve_tests: True,
-      source_mapped_errors: True,
-    )
-  let assert Ok(_) = gleedoc.run(config)
+  gleedoc.new()
+  |> gleedoc.with_source_dir("dev/fixtures")
+  |> gleedoc.with_output_dir("test/integration")
+  |> gleedoc.with_extra_imports(["gleam/int", "gleam/string"])
+  |> gleedoc.with_preserve_tests(True)
+  |> gleedoc.run()
 }

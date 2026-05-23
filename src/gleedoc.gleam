@@ -55,6 +55,87 @@ pub fn default() -> GleedocConfig {
   )
 }
 
+/// Start a new `GleedocConfig` builder using the same defaults as
+/// [`default`](#default). Intended to be the entry point of the builder
+/// pipeline:
+///
+/// ## Example
+///
+/// ```gleam
+/// gleedoc.new()
+/// |> gleedoc.with_source_dir("src")
+/// |> gleedoc.run
+/// ```
+pub fn new() -> GleedocConfig {
+  default()
+}
+
+/// Set the directory `gleedoc` reads source files from.
+pub fn with_source_dir(
+  config: GleedocConfig,
+  source_dir: String,
+) -> GleedocConfig {
+  GleedocConfig(..config, source_dir: source_dir)
+}
+
+/// Set the directory `gleedoc` writes generated tests to.
+pub fn with_output_dir(
+  config: GleedocConfig,
+  output_dir: String,
+) -> GleedocConfig {
+  GleedocConfig(..config, output_dir: output_dir)
+}
+
+/// Replace the list of extra imports added to every generated test file.
+///
+/// To append a single import instead of replacing the whole list, use
+/// [`add_extra_import`](#add_extra_import).
+pub fn with_extra_imports(
+  config: GleedocConfig,
+  extra_imports: List(String),
+) -> GleedocConfig {
+  GleedocConfig(..config, extra_imports: extra_imports)
+}
+
+/// Append a single import to `extra_imports`. Convenient when chaining
+/// multiple imports through the builder pipeline.
+///
+/// ## Example
+///
+/// ```gleam
+/// gleedoc.new()
+/// |> gleedoc.add_extra_import("gleam/int")
+/// |> gleedoc.add_extra_import("gleam/string")
+/// ```
+pub fn add_extra_import(
+  config: GleedocConfig,
+  import_path: String,
+) -> GleedocConfig {
+  GleedocConfig(
+    ..config,
+    extra_imports: list.append(config.extra_imports, [import_path]),
+  )
+}
+
+/// Set whether generated test files should be preserved in `output_dir`
+/// after doc tests finish.
+pub fn with_preserve_tests(
+  config: GleedocConfig,
+  preserve_tests: Bool,
+) -> GleedocConfig {
+  GleedocConfig(..config, preserve_tests: preserve_tests)
+}
+
+/// Set whether each generated `assert` should be annotated with
+/// `as "file:line"`, so test failures are reported against the original
+/// source file and line.
+pub fn with_source_mapped_errors(
+  config: GleedocConfig,
+  source_mapped_errors: Bool,
+) -> GleedocConfig {
+  GleedocConfig(..config, source_mapped_errors: source_mapped_errors)
+}
+
 /// Entry point for `gleam run -m gleedoc`.
 /// It's essentially executing the `run` function using the `default` config
 /// with `preserve_tests` set to `True`.
