@@ -1,6 +1,7 @@
 import argv
 import envoy
 import filepath
+import gleam/bool
 import gleam/io
 import gleam/list
 import gleam/result
@@ -187,28 +188,7 @@ fn run_with_inner(
               ],
             )
           case result {
-            Ok(_) -> {
-              case config.preserve_tests {
-                False -> {
-                  let generated_dir =
-                    filepath.join(config.output_dir, "gleedoc")
-                  case simplifile.delete(generated_dir) {
-                    Ok(_) -> Nil
-                    Error(simplifile.Enoent) -> Nil
-                    Error(err) -> {
-                      io.println_error(
-                        "Warning: failed to clean generated tests at "
-                        <> generated_dir
-                        <> ": "
-                        <> simplifile.describe_error(err),
-                      )
-                      Nil
-                    }
-                  }
-                }
-                True -> Nil
-              }
-            }
+            Ok(_) -> clean_generated_tests(config)
             Error(#(status, message)) -> {
               case message {
                 "" -> Nil
@@ -225,6 +205,28 @@ fn run_with_inner(
 
 fn find_gleam_files(source_dir: String) -> Result(List(String), snag.Snag) {
   find_gleam_files_loop(source_dir, [])
+}
+
+/// Best-effort cleanup of generated test files after the test run.
+/// When `preserve_tests` is `True`, this is a no-op.
+fn clean_generated_tests(config: GleedocConfig) -> Nil {
+  use <- bool.guard(when: config.preserve_tests, return: Nil)
+
+  let generated_dir = config.output_dir |> filepath.join("gleedoc")
+
+  case simplifile.delete(generated_dir) {
+    Ok(_) -> Nil
+    Error(simplifile.Enoent) -> Nil
+    Error(err) -> {
+      io.println_error(
+        "Warning: failed to clean generated tests at "
+        <> generated_dir
+        <> ": "
+        <> simplifile.describe_error(err),
+      )
+      Nil
+    }
+  }
 }
 
 fn find_gleam_files_loop(

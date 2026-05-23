@@ -1,3 +1,4 @@
+import gleam/bool
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
@@ -145,38 +146,34 @@ fn extract_definition_docs(
 
             // Doc comment in progress.
             _ -> {
-              case string.trim(line) == "" {
-                // Blank line inside a doc block — keep buffering.
-                True -> state
+              // Blank line inside a doc block — keep buffering.
+              use <- bool.guard(when: string.trim(line) == "", return: state)
 
-                // Non-blank, non-doc line after a doc block — finalize the block.
-                False -> {
-                  let target = extract_definition_name(line)
+              // Non-blank, non-doc line after a doc block — finalize the block.
+              let target = extract_definition_name(line)
 
-                  let start_line_number =
-                    current_doc
-                    |> list.last
-                    |> result.map(fn(pair) { pair.0 })
-                    |> result.unwrap(line_no)
+              let start_line_number =
+                current_doc
+                |> list.last
+                |> result.map(fn(pair) { pair.0 })
+                |> result.unwrap(line_no)
 
-                  let doc_lines =
-                    current_doc
-                    |> list.reverse
-                    |> list.map(fn(pair) { pair.1 })
+              let doc_lines =
+                current_doc
+                |> list.reverse
+                |> list.map(fn(pair) { pair.1 })
 
-                  let new_doc =
-                    DocBlock(
-                      lines: doc_lines,
-                      target: target,
-                      file: file,
-                      start_line: start_line_number,
-                      public_names: public_names,
-                      module_imports: module_imports,
-                    )
+              let new_doc =
+                DocBlock(
+                  lines: doc_lines,
+                  target: target,
+                  file: file,
+                  start_line: start_line_number,
+                  public_names: public_names,
+                  module_imports: module_imports,
+                )
 
-                  #([new_doc, ..processed_docs], [])
-                }
-              }
+              #([new_doc, ..processed_docs], [])
             }
           }
         }

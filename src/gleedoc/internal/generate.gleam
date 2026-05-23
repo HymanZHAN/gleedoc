@@ -318,23 +318,15 @@ fn to_function_body(
       False -> "  " <> line
     }
 
-    case line |> string.trim_start |> string.starts_with("assert") {
-      True ->
-        case source_mapped_errors {
-          False -> line
-          True -> {
-            let target = case maybe_offset {
-              option.Some(offset) ->
-                source_file
-                <> ":"
-                <> int.to_string(source_start_line + offset - 1)
-              option.None -> fallback_target
-            }
-            line <> " as \"" <> target <> "\""
-          }
-        }
-      False -> line
+    let is_assert = line |> string.trim_start |> string.starts_with("assert")
+    use <- bool.guard(when: !is_assert || !source_mapped_errors, return: line)
+
+    let target = case maybe_offset {
+      option.Some(offset) ->
+        source_file <> ":" <> int.to_string(source_start_line + offset - 1)
+      option.None -> fallback_target
     }
+    line <> " as \"" <> target <> "\""
   })
   |> string.join("\n")
 }
