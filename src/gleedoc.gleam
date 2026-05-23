@@ -88,7 +88,7 @@ pub fn with_output_dir(
 
 /// Replace the list of extra imports added to every generated test file.
 ///
-/// To append a single import instead of replacing the whole list, use
+/// To add a single import instead of replacing the whole list, use
 /// [`add_extra_import`](#add_extra_import).
 pub fn with_extra_imports(
   config: GleedocConfig,
@@ -97,7 +97,7 @@ pub fn with_extra_imports(
   GleedocConfig(..config, extra_imports: extra_imports)
 }
 
-/// Append a single import to `extra_imports`. Convenient when chaining
+/// Add a single import to `extra_imports`. Convenient when chaining
 /// multiple imports through the builder pipeline.
 ///
 /// ## Example
@@ -113,7 +113,7 @@ pub fn add_extra_import(
 ) -> GleedocConfig {
   GleedocConfig(
     ..config,
-    extra_imports: list.append(config.extra_imports, [import_path]),
+    extra_imports: config.extra_imports |> list.prepend(import_path),
   )
 }
 
