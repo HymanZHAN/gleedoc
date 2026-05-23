@@ -8,6 +8,7 @@
 ////
 //// Steps:
 ////   1. Update CHANGELOG.md via `git cliff --tag v<version> --unreleased --prepend CHANGELOG.md`.
+////      The changelog format is configured in `cliff.toml` at the repo root.
 ////   2. Bump the `version` field in `gleam.toml`.
 ////   3. `git add CHANGELOG.md gleam.toml` and commit with message `build: bump version number`.
 ////   4. `git tag <version>`.

@@ -25,7 +25,7 @@
 
 | Feature                                | Rust       | Elixir      | Python     | **gleedoc** |
 | -------------------------------------- | ---------- | ----------- | ---------- | ----------- |
-| Single-command CLI experience          | ✅         | ✅          | ✅         | 📆          |
+| Single-command CLI experience          | ✅         | ✅          | ✅         | ✅          |
 | `ignore` / skip attribute              | ✅         | ✅          | ✅         | ✅          |
 | `no_run` (compile only)                | ✅         | ❌          | ❌         | 🛑          |
 | `should_panic`                         | ✅         | ❌          | ❌         | 🛑          |
