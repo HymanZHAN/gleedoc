@@ -319,7 +319,10 @@ fn find_gleam_files_loop(
     |> simplifile.read_directory
     |> result.map_error(fn(err) {
       snag.new(
-        "Failed to read directory: " <> dir <> " - " <> string.inspect(err),
+        "Failed to read directory: "
+        <> dir
+        <> " - "
+        <> simplifile.describe_error(err),
       )
     }),
   )
@@ -331,7 +334,9 @@ fn find_gleam_files_loop(
       path
       |> simplifile.is_directory
       |> result.map_error(fn(err) {
-        snag.new("Failed to stat: " <> path <> " - " <> string.inspect(err))
+        snag.new(
+          "Failed to stat: " <> path <> " - " <> simplifile.describe_error(err),
+        )
       }),
     )
 

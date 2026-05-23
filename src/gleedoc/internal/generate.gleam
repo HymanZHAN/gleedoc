@@ -1,8 +1,9 @@
 import filepath
 import gleam/bool
+import gleam/dict
 import gleam/int
 import gleam/list
-import gleam/option
+import gleam/option.{None, Some}
 import gleam/result
 import gleam/string
 import gleedoc/internal/parse.{type CodeBlock}
@@ -33,6 +34,7 @@ pub fn generate_tests(
   let by_file = group_by_file(blocks)
 
   by_file
+  |> dict.to_list
   |> list.try_map(fn(pair) {
     let #(file, code_blocks) = pair
     let test_file_name = test_file_name(file)
@@ -46,7 +48,7 @@ pub fn generate_tests(
           "Failed to create directory: "
           <> output_dir
           <> " - "
-          <> string.inspect(err),
+          <> simplifile.describe_error(err),
         )
       }),
     )
@@ -94,7 +96,7 @@ pub fn generate_tests(
           "Failed to write test file: "
           <> test_path
           <> " - "
-          <> string.inspect(err),
+          <> simplifile.describe_error(err),
         )
       }),
     )
@@ -115,30 +117,18 @@ pub fn format_tests(output_dir: String) -> Result(String, snag.Snag) {
   })
 }
 
-fn group_by_file(blocks: List(CodeBlock)) -> List(#(String, List(CodeBlock))) {
+fn group_by_file(
+  blocks: List(CodeBlock),
+) -> dict.Dict(String, List(CodeBlock)) {
   blocks
-  |> list.fold([], fn(groups, block) {
-    let file = block.source.file
-    case find_group(groups, file) {
-      Ok(#(_, existing)) -> {
-        list.map(groups, fn(pair) {
-          case pair.0 == file {
-            True -> #(file, [block, ..existing])
-            False -> pair
-          }
-        })
-      }
-      Error(Nil) -> [#(file, [block]), ..groups]
+  |> list.fold(dict.new(), fn(acc, block) {
+    use existing <- dict.upsert(acc, block.source.file)
+    case existing {
+      Some(xs) -> [block, ..xs]
+      None -> [block]
     }
   })
-  |> list.map(fn(pair) { #(pair.0, list.reverse(pair.1)) })
-}
-
-fn find_group(
-  groups: List(#(String, List(CodeBlock))),
-  file: String,
-) -> Result(#(String, List(CodeBlock)), Nil) {
-  list.find(groups, fn(pair) { pair.0 == file })
+  |> dict.map_values(fn(_, blocks) { list.reverse(blocks) })
 }
 
 fn module_name_from_file(file: String) -> String {

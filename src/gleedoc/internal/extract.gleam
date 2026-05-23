@@ -34,7 +34,10 @@ pub fn doc_blocks_from_file(
     |> simplifile.read
     |> result.map_error(fn(err) {
       snag.new(
-        "Failed to read file: " <> file_path <> " - " <> string.inspect(err),
+        "Failed to read file: "
+        <> file_path
+        <> " - "
+        <> simplifile.describe_error(err),
       )
     }),
   )
