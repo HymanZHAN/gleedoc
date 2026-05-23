@@ -25,4 +25,42 @@ let config = gleedoc.GleedocConfig(..gleedoc.default(), preserve_tests: True)
 
 ## `run_with`
 
-TBD
+Run `gleedoc` with `gleeunit` tests (or any other test functions you want to run).
+
+It takes two arguments: a `GleedocConfig` object and function that will be executed after `gleedoc` generates all the doc tests. Typically, it should be `gleeunit.main`.
+
+```gleam
+import gleedoc
+import gleeunit
+
+pub fn main() {
+  let config =
+    gleedoc.GleedocConfig(
+      output_dir: "test/integration",
+      source_dir: "dev/fixtures",
+      extra_imports: ["gleam/int", "gleam/string"],
+      preserve_tests: False,
+    )
+
+  config |> gleedoc.run_with(gleeunit.main)
+}
+```
+
+## `run`
+
+Run `gleedoc` on a project, extracting doc tests from source files and generating test files in the output directory. Typically, you'd want to use this in your own test preparation module:
+
+```gleam
+import gleedoc
+
+pub fn main() {
+  let config =
+    gleedoc.GleedocConfig(
+      output_dir: "test/integration",
+      source_dir: "dev/fixtures",
+      extra_imports: ["gleam/int"],
+      preserve_tests: True,
+    )
+  let assert Ok(_) = gleedoc.run(config)
+}
+```
