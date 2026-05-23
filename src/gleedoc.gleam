@@ -47,11 +47,11 @@ pub fn default() -> GleedocConfig {
   )
 }
 
-/// Entry point for `gleam run -m gleedoc`. 
-/// It's essentially executing the `run` function using the `default` config 
+/// Entry point for `gleam run -m gleedoc`.
+/// It's essentially executing the `run` function using the `default` config
 /// with `preserve_tests` set to `True`.
-/// 
-/// ```gleam,ignore
+///
+/// ```gleam
 /// let config = GleedocConfig(..default(), preserve_tests: True)
 /// ```
 pub fn main() -> Nil {
@@ -65,12 +65,12 @@ pub fn main() -> Nil {
 
 /// Run `gleedoc` on a project, extracting doc tests from source files and generating
 /// test files in the output directory.
-/// 
+///
 /// ## Example
-/// 
+///
 /// ```gleam
 /// import gleedoc
-/// 
+///
 /// pub fn main() {
 ///   let config =
 ///     gleedoc.GleedocConfig(
@@ -121,12 +121,12 @@ pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
   }
 }
 
-/// Run `gleedoc` with `gleeunit.main`, so one `gleam test` command will 
+/// Run `gleedoc` with `gleeunit.main`, so one `gleam test` command will
 /// take care of both doc tests and unit tests.
 ///
 /// ## Example
 ///
-/// ```gleam,ignore
+/// ```gleam
 /// import gleedoc
 /// import gleeunit
 ///

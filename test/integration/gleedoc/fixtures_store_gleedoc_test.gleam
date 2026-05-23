@@ -9,8 +9,8 @@ pub fn module_1_test() {
   let s = store.new() |> store.insert("name", "Gleam")
 
   assert s |> store.get("name") == option.Some("Gleam")
-    as "dev/fixtures/store.gleam:5"
-  assert s |> store.get("age") == option.None as "dev/fixtures/store.gleam:5"
+    as "dev/fixtures/store.gleam:8"
+  assert s |> store.get("age") == option.None as "dev/fixtures/store.gleam:9"
 }
 
 // From: dev/fixtures/store.gleam:12
@@ -18,7 +18,7 @@ pub fn module_2_test() {
   let s = store.new() |> store.insert("count", 5)
 
   assert s |> store.get("count") |> option.unwrap(0) == 5
-    as "dev/fixtures/store.gleam:12"
+    as "dev/fixtures/store.gleam:15"
 
   // `gleam/int` is not imported anywhere in this file, so it has to be
   // resolved by `extra_imports`.
@@ -28,13 +28,13 @@ pub fn module_2_test() {
     |> option.unwrap(42)
     |> int.to_string
     == "42"
-    as "dev/fixtures/store.gleam:12"
+    as "dev/fixtures/store.gleam:19"
 }
 
 // From: dev/fixtures/store.gleam:44
 pub fn get_3_test() {
   let s = new() |> insert("x", 42)
 
-  assert get(s, "x") == Some(42) as "dev/fixtures/store.gleam:44"
-  assert get(s, "y") == None as "dev/fixtures/store.gleam:44"
+  assert get(s, "x") == Some(42) as "dev/fixtures/store.gleam:47"
+  assert get(s, "y") == None as "dev/fixtures/store.gleam:48"
 }

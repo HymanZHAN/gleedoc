@@ -13,6 +13,9 @@ pub type CodeBlock {
     attributes: List(String),
     /// The raw code inside the fence (without import statements)
     code: String,
+    /// The 1-based line number within the doc comment for each line of `code`,
+    /// in the same order. Used to map code lines back to source file lines.
+    code_line_offsets: List(Int),
     /// The source doc block this came from
     source: DocBlock,
     /// The 1-based line number within the doc comment where the code block starts
@@ -35,27 +38,31 @@ pub fn extract_gleam_blocks(doc_blocks: List(DocBlock)) -> List(CodeBlock) {
 
 fn doc_block_to_code_blocks(doc: DocBlock) -> List(CodeBlock) {
   let #(accumulated, current) =
-    list.index_fold(doc.lines, #([], None), fn(state, line, line_no) {
+    doc.lines
+    |> list.index_fold(#([], None), fn(state, line, line_no) {
       let #(accumulated, current) = state
       let trimmed = string.trim(line)
+      // `line_no` is 0-based; doc-line offsets are 1-based.
+      let offset = line_no + 1
       case current, trimmed {
         None, "```" <> rest -> {
           let lang = string.trim(rest)
-          #(accumulated, Some(#(lang, [], line_no + 1)))
+          #(accumulated, Some(#(lang, [], offset)))
         }
         None, _ -> state
         Some(#(lang, code_lines, start)), "```" -> {
+          let code_lines = code_lines |> list.reverse
           #([build_block(lang, code_lines, start, doc), ..accumulated], None)
         }
         Some(#(lang, code_lines, start)), _ -> {
-          #(accumulated, Some(#(lang, [line, ..code_lines], start)))
+          #(accumulated, Some(#(lang, [#(offset, line), ..code_lines], start)))
         }
       }
     })
 
   let final_accumulated = case current {
     Some(#(lang, code_lines, start)) -> [
-      build_block(lang, code_lines, start, doc),
+      build_block(lang, code_lines |> list.reverse, start, doc),
       ..accumulated
     ]
     None -> accumulated
@@ -66,18 +73,20 @@ fn doc_block_to_code_blocks(doc: DocBlock) -> List(CodeBlock) {
 
 fn build_block(
   info_string: String,
-  code_lines: List(String),
+  code_lines: List(#(Int, String)),
   start: Int,
   doc: DocBlock,
 ) -> CodeBlock {
-  let #(imports, code) =
-    code_lines |> list.reverse |> string.join("\n") |> extract_imports
+  let #(imports, kept) = extract_imports(code_lines)
+  let code = kept |> list.map(fn(pair) { pair.1 }) |> string.join("\n")
+  let code_line_offsets = kept |> list.map(fn(pair) { pair.0 })
   let #(language, attributes) = parse_info_string(info_string)
 
   CodeBlock(
     language: language,
     attributes: attributes,
     code: code,
+    code_line_offsets: code_line_offsets,
     source: doc,
     doc_line_offset: start,
     imports: imports,
@@ -93,16 +102,17 @@ fn parse_info_string(info_string: String) -> #(String, List(String)) {
   }
 }
 
-/// Extract import statements from code and return them separately.
-fn extract_imports(code: String) -> #(List(String), String) {
+/// Extract import statements from a list of `#(doc_line_offset, line)` pairs,
+/// returning the trimmed import statements and the remaining lines (with
+/// their offsets preserved).
+fn extract_imports(
+  lines: List(#(Int, String)),
+) -> #(List(String), List(#(Int, String))) {
   let #(imports, rest) =
-    code
-    |> string.split("\n")
-    |> list.map(fn(line) { #(string.trim(line), line) })
-    |> list.partition(fn(pair) { string.starts_with(pair.0, "import ") })
+    lines
+    |> list.partition(fn(pair) {
+      pair.1 |> string.trim |> string.starts_with("import ")
+    })
 
-  #(
-    imports |> list.map(fn(pair) { pair.0 }),
-    rest |> list.map(fn(pair) { pair.1 }) |> string.join("\n"),
-  )
+  #(imports |> list.map(fn(pair) { string.trim(pair.1) }), rest)
 }

@@ -11,7 +11,7 @@ import simplifile
 import snag
 
 /// Configuration for test generation.
-pub type Config {
+pub type GenerateConfig {
   Config(
     /// Directory to write generated tests to, typically "test"
     output_dir: String,
@@ -23,7 +23,7 @@ pub type Config {
 /// Generate test files from extracted code blocks.
 pub fn generate_tests(
   blocks: List(CodeBlock),
-  config: Config,
+  config: GenerateConfig,
 ) -> Result(List(String), snag.Snag) {
   // Group blocks by the file they came from
   let by_file = group_by_file(blocks)
@@ -61,7 +61,7 @@ pub fn generate_tests(
     // Imports defined in each code block
     let block_imports = code_blocks |> list.flat_map(fn(b) { b.imports })
 
-    // Pre-included imports defined by user
+    // Extra imports defined by user
     let extra_imports =
       config.extra_imports |> list.map(fn(p) { "import " <> p })
 
@@ -259,7 +259,13 @@ fn generate_test_function(block: CodeBlock, index: Int) -> String {
     "",
     source_info,
     "pub fn " <> test_func_name <> "() {",
-    block.code |> to_function_body(detailed_target),
+    to_function_body(
+      block.code,
+      block.code_line_offsets,
+      block.source.file,
+      block.source.start_line,
+      detailed_target,
+    ),
     "}",
   ]
   |> string.join("\n")
@@ -272,22 +278,55 @@ fn sanitize_name(name: String) -> String {
   |> string.replace("-", "_")
 }
 
-fn to_function_body(code: String, detailed_target: String) -> String {
-  code
-  |> string.trim
-  |> string.split("\n")
-  |> list.map(fn(line) {
+fn to_function_body(
+  code: String,
+  code_line_offsets: List(Int),
+  source_file: String,
+  source_start_line: Int,
+  fallback_target: String,
+) -> String {
+  // Drop leading/trailing blank lines while keeping `code_line_offsets`
+  // aligned with the surviving lines.
+  let pairs =
+    list.zip(string.split(code, "\n"), pad_offsets(code, code_line_offsets))
+    |> list.drop_while(fn(p) { string.trim(p.0) == "" })
+    |> list.reverse
+    |> list.drop_while(fn(p) { string.trim(p.0) == "" })
+    |> list.reverse
+
+  pairs
+  |> list.map(fn(pair) {
+    let #(line, maybe_offset) = pair
     let line = case string.trim(line) == "" {
       True -> ""
       False -> "  " <> line
     }
 
     case line |> string.trim_start |> string.starts_with("assert") {
-      True -> line <> " as \"" <> detailed_target <> "\""
+      True -> {
+        let target = case maybe_offset {
+          option.Some(offset) ->
+            source_file <> ":" <> int.to_string(source_start_line + offset - 1)
+          option.None -> fallback_target
+        }
+        line <> " as \"" <> target <> "\""
+      }
       False -> line
     }
   })
   |> string.join("\n")
+}
+
+/// Wrap each offset in `Some`, padding with `None`s so the result has the
+/// same length as the lines of `code`. Extra offsets are truncated.
+fn pad_offsets(code: String, offsets: List(Int)) -> List(option.Option(Int)) {
+  let n = code |> string.split("\n") |> list.length
+  let wrapped = offsets |> list.map(option.Some)
+  let len = list.length(wrapped)
+  case len >= n {
+    True -> wrapped |> list.take(n)
+    False -> list.append(wrapped, list.repeat(option.None, n - len))
+  }
 }
 
 /// Clean up generated test files.
