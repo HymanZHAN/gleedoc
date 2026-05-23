@@ -1,4 +1,5 @@
 import filepath
+import gleam/bool
 import gleam/int
 import gleam/list
 import gleam/option
@@ -17,6 +18,9 @@ pub type GenerateConfig {
     output_dir: String,
     /// A list of imports that will automatically be applied to every generated test file
     extra_imports: List(String),
+    /// Whether to annotate each generated `assert` with `as "file:line"`,
+    /// pointing back to the exact source line of the assertion.
+    source_mapped_errors: Bool,
   )
 }
 
@@ -71,7 +75,8 @@ pub fn generate_tests(
       |> list.prepend(import_to_source)
       |> merge_imports
 
-    let test_functions = generate_test_functions(code_blocks)
+    let test_functions =
+      generate_test_functions(code_blocks, config.source_mapped_errors)
 
     let raw_content =
       string.join(
@@ -237,12 +242,21 @@ fn generate_import_to_source(
   }
 }
 
-fn generate_test_functions(blocks: List(CodeBlock)) -> List(String) {
+fn generate_test_functions(
+  blocks: List(CodeBlock),
+  source_mapped_errors: Bool,
+) -> List(String) {
   blocks
-  |> list.index_map(generate_test_function)
+  |> list.index_map(fn(block, index) {
+    generate_test_function(block, index, source_mapped_errors)
+  })
 }
 
-fn generate_test_function(block: CodeBlock, index: Int) -> String {
+fn generate_test_function(
+  block: CodeBlock,
+  index: Int,
+  source_mapped_errors: Bool,
+) -> String {
   let target_name = option.unwrap(block.source.target, "module")
 
   let test_func_name =
@@ -265,6 +279,7 @@ fn generate_test_function(block: CodeBlock, index: Int) -> String {
       block.source.file,
       block.source.start_line,
       detailed_target,
+      source_mapped_errors,
     ),
     "}",
   ]
@@ -284,6 +299,7 @@ fn to_function_body(
   source_file: String,
   source_start_line: Int,
   fallback_target: String,
+  source_mapped_errors: Bool,
 ) -> String {
   // Drop leading/trailing blank lines while keeping `code_line_offsets`
   // aligned with the surviving lines.
@@ -303,14 +319,20 @@ fn to_function_body(
     }
 
     case line |> string.trim_start |> string.starts_with("assert") {
-      True -> {
-        let target = case maybe_offset {
-          option.Some(offset) ->
-            source_file <> ":" <> int.to_string(source_start_line + offset - 1)
-          option.None -> fallback_target
+      True ->
+        case source_mapped_errors {
+          False -> line
+          True -> {
+            let target = case maybe_offset {
+              option.Some(offset) ->
+                source_file
+                <> ":"
+                <> int.to_string(source_start_line + offset - 1)
+              option.None -> fallback_target
+            }
+            line <> " as \"" <> target <> "\""
+          }
         }
-        line <> " as \"" <> target <> "\""
-      }
       False -> line
     }
   })

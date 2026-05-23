@@ -8,6 +8,7 @@ pub fn main() {
       source_dir: "dev/fixtures",
       extra_imports: ["gleam/int", "gleam/string"],
       preserve_tests: True,
+      source_mapped_errors: True,
     )
 
   config |> gleedoc.run_with(gleeunit.main)
@@ -20,4 +21,5 @@ pub fn default_config_test() {
   assert config.output_dir == "test"
   assert config.extra_imports == []
   assert config.preserve_tests == False
+  assert config.source_mapped_errors == True
 }

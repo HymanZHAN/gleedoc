@@ -38,7 +38,7 @@ gleam test
 
 The corresponding doc tests will be first generated in `<output_dir>/gleedoc` and then be executed as part of the test run.
 
-If a doc test fails, you can navigate to the corresponding doc block via the `info` in the terminal output:
+If a doc test fails, you can navigate to the failing assertion in the corresponding doc block via the `info` in the terminal output:
 
 ```text
 assert test/integration/gleedoc/fixtures_example_gleedoc_test.gleam:9
@@ -46,7 +46,7 @@ assert test/integration/gleedoc/fixtures_example_gleedoc_test.gleam:9
  code: assert result == 5
  left: 3
 right: literal
- info: dev/fixtures/example.gleam:6  👈
+ info: dev/fixtures/example.gleam:8  👈
 ```
 
 For more details about the exposed functions and types, please refer to [API](./doc/API.md).
@@ -99,6 +99,8 @@ It needs to be rewritten as:
 
 This is because in the first example, it's hard to decide where to put the `as` clause for source-mapped error reporting. For simplicity, the current implementation just puts the `as` clause at the end of the `assert` line. This is a known limitation and might be enhanced in the future.
 
+If your current code snippets in comments don't follow this pattern, and you don't need the source-mapped error reports yet, you can disable this feature by setting `GleedocConfig.source_mapped_errors` to `False`.
+
 ## How it works
 
 1. **Extract** `///` doc comments from your `.gleam` source files.
@@ -146,6 +148,7 @@ let config = gleedoc.GleedocConfig(
   output_dir: "test",
   extra_imports: ["gleam/string"], // 4️⃣
   preserve_tests: True,
+  source_mapped_errors: True,
 )
 ```
 

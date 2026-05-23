@@ -30,6 +30,11 @@ pub type GleedocConfig {
     /// Whether to preserve generated test files in `output_dir` after doc tests finish.
     /// If you are running `gleedoc.run` programmatically, please always set this to `True`.
     preserve_tests: Bool,
+    /// Whether to annotate each generated `assert` with `as "file:line"`,
+    /// pointing back to the exact source line of the assertion in the doc
+    /// comment. When `True` (the default), test failures are reported against
+    /// the original source file/line rather than the generated test file.
+    source_mapped_errors: Bool,
   )
 }
 
@@ -38,12 +43,14 @@ pub type GleedocConfig {
 /// - `output_dir`: `"test"`
 /// - `extra_imports`: `[]`
 /// - `preserve_tests`: `False`
+/// - `source_mapped_errors`: `True`
 pub fn default() -> GleedocConfig {
   GleedocConfig(
     output_dir: "test",
     source_dir: "src",
     extra_imports: [],
     preserve_tests: False,
+    source_mapped_errors: True,
   )
 }
 
@@ -78,6 +85,7 @@ pub fn main() -> Nil {
 ///       source_dir: "dev/fixtures",
 ///       extra_imports: ["gleam/int"],
 ///       preserve_tests: True,
+///       source_mapped_errors: True,
 ///     )
 ///   let assert Ok(_) = gleedoc.run(config)
 /// }
@@ -110,6 +118,7 @@ pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
         Config(
           output_dir: config.output_dir,
           extra_imports: config.extra_imports,
+          source_mapped_errors: config.source_mapped_errors,
         )
       use _ <- result.try(generate.generate_tests(blocks, gen_config))
 

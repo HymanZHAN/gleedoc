@@ -15,6 +15,7 @@ pub fn main() {
       source_dir: "dev/fixtures",
       extra_imports: ["gleam/int", "gleam/string"],
       preserve_tests: False,
+      source_mapped_errors: True,
     )
 
   config |> gleedoc.run_with(gleeunit.main)
@@ -101,6 +102,7 @@ pub fn main() {
       source_dir: "dev/fixtures",
       extra_imports: ["gleam/int"],
       preserve_tests: True,
+      source_mapped_errors: True,
     )
   let assert Ok(_) = gleedoc.run(config)
 }
