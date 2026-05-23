@@ -2,7 +2,7 @@
 
 ## Integration with `gleeunit`
 
-In your test entry file `test/<your_project>_test.gleam`, you can directly construct a `GleedocConfig` and use it with the `gleedoc.run_with` function. Take [`gleedoc_test.gleam`](./test/gleedoc_test.gleam) for example:
+In your test entry file `test/<your_project>_test.gleam`, you can directly construct a `GleedocConfig` and use it with the `gleedoc.run_with` function. Take [`gleedoc_test.gleam`](../test/gleedoc_test.gleam) for example:
 
 ```gleam
 import gleedoc
@@ -107,7 +107,7 @@ gleam test
 
 ## Run programmatically
 
-You can also create a custom test preparation module in your `dev` directory. Take [`prepare_tests.gleam`](./dev/prepare_tests.gleam) for example:
+You can also create a custom test preparation module in your `dev` directory. Take [`prepare_tests.gleam`](../dev/prepare_tests.gleam) for example:
 
 ```gleam
 import gleedoc
@@ -141,7 +141,7 @@ You can skip individual code blocks by adding the `ignore` attribute after the l
 
 Any attributes other than `ignore` are accepted but currently have no effect. The attribute is case-insensitive but not tolerant to whitespaces, so ` ```Gleam,Ignore ` works too, but ` ```Gleam , Ignore ` doesn't.
 
-> There are more examples in [`test/fixtures`](./test/fixtures/) and [`test/integration/gleedoc`](./test/integration/gleedoc/).
+> There are more examples in [`dev/fixtures`](../dev/fixtures/) and [`test/integration/gleedoc`](../test/integration/gleedoc/).
 
 ## Deno
 

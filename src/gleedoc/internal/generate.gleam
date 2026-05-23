@@ -357,15 +357,11 @@ pub fn clean_generated(output_dir: String) -> Result(Nil, snag.Snag) {
       })
       Ok(Nil)
     }
-    Error(err) -> {
-      // If the output dir doesn't exist, that's fine
-      case string.inspect(err) {
-        "Enoent" -> Ok(Nil)
-        _ ->
-          Error(snag.new(
-            "Failed to clean generated files: " <> string.inspect(err),
-          ))
-      }
-    }
+    // If the output dir doesn't exist, that's fine
+    Error(simplifile.Enoent) -> Ok(Nil)
+    Error(err) ->
+      Error(snag.new(
+        "Failed to clean generated files: " <> simplifile.describe_error(err),
+      ))
   }
 }

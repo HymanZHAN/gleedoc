@@ -395,7 +395,7 @@ pub fn generate_merges_snippet_and_module_imports_test() {
   Nil
 }
 
-/// Prelude imports configured in GleedocConfig should automatically be
+/// Extra imports configured in GleedocConfig should automatically be
 /// included in every generated test file. When the raw module name form
 /// (e.g. "gleam/dict") is used, it is automatically prefixed with
 /// "import ". Imports that are not referenced by the test code are still
@@ -428,7 +428,7 @@ pub fn generate_with_extra_imports_test() {
       imports: [],
     )
 
-  // Pass prelude as a raw module name — generate.gleam will prefix it.
+  // Pass an extra import as a raw module name — generate.gleam will prefix it.
   let config =
     generate.Config(
       output_dir: "test",
@@ -441,7 +441,7 @@ pub fn generate_with_extra_imports_test() {
 
   let assert Ok(text) = simplifile.read(path)
 
-  // The prelude import should appear because dict.new() is used.
+  // The extra import should appear because dict.new() is used.
   assert string.contains(text, "import gleam/dict")
   assert string.contains(text, "let d = dict.new()")
 
