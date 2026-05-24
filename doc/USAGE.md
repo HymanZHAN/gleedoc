@@ -14,7 +14,7 @@ pub fn main() {
       output_dir: "test/integration",
       source_dir: "dev/fixtures",
       extra_imports: ["gleam/int", "gleam/string"],
-      preserve_tests: False,
+      preserve_tests: True,
       source_mapped_errors: True,
     )
 
@@ -95,7 +95,7 @@ import math.{add}
 // From: src/math.gleam:3
 pub fn add_1_test() {
   let result = add(1, 2)
-  assert result == 3 as "src/math.gleam:3"
+  assert result == 3 as "src/math.gleam:5"
 }
 ```
 
