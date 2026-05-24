@@ -1,8 +1,9 @@
+import gleam/bool
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
 import gleam/string
-import gleedoc/scan
+import gleedoc/internal/scan
 import simplifile
 import snag
 
@@ -33,7 +34,10 @@ pub fn doc_blocks_from_file(
     |> simplifile.read
     |> result.map_error(fn(err) {
       snag.new(
-        "Failed to read file: " <> file_path <> " - " <> string.inspect(err),
+        "Failed to read file: "
+        <> file_path
+        <> " - "
+        <> simplifile.describe_error(err),
       )
     }),
   )
@@ -73,7 +77,7 @@ fn extract_blocks(
     module_doc_lines |> extract_module_doc(file, public_names, module_imports)
 
   // Skip any blank lines that follow the module doc block.
-  let rest = list.drop_while(rest, fn(item) { string.trim(item.1) == "" })
+  let rest = rest |> list.drop_while(fn(item) { string.trim(item.1) == "" })
 
   // 2. Extract definition docs (`///`) from the remaining lines.
   let definition_docs =
@@ -103,12 +107,7 @@ fn extract_module_doc(
         module_doc_lines
         |> list.map(fn(item) {
           let #(_, line) = item
-          let trimmed = string.trim_start(line)
-          let raw = string.drop_start(trimmed, 4)
-          case string.starts_with(raw, " ") {
-            True -> string.drop_start(raw, 1)
-            False -> raw
-          }
+          line |> string.trim_start |> string.drop_start(4)
         })
 
       Some(DocBlock(
@@ -140,13 +139,6 @@ fn extract_definition_docs(
         // Still inside a doc comment — append this line to the buffer.
         True -> {
           let doc_line = trimmed |> string.drop_start(3)
-          // There is normally a space between `///` and the actual code, and we
-          // need to remove this space if it exists so that we don't need to
-          // trim the whole doc_line and can preserve the original indentation.
-          let doc_line = case doc_line |> string.starts_with(" ") {
-            True -> doc_line |> string.drop_start(1)
-            False -> doc_line
-          }
           #(processed_docs, [#(line_no, doc_line), ..current_doc])
         }
 
@@ -157,37 +149,34 @@ fn extract_definition_docs(
 
             // Doc comment in progress.
             _ -> {
-              case string.trim(line) == "" {
-                // Blank line inside a doc block — keep buffering.
-                True -> state
+              // Blank line inside a doc block — keep buffering.
+              use <- bool.guard(when: string.trim(line) == "", return: state)
 
-                // Non-blank, non-doc line after a doc block — finalize the block.
-                False -> {
-                  let target = extract_definition_name(line)
+              // Non-blank, non-doc line after a doc block — finalize the block.
+              let target = extract_definition_name(line)
 
-                  let start_line_number =
-                    current_doc
-                    |> list.last
-                    |> result.map(fn(pair) { pair.0 })
-                    |> result.unwrap(line_no)
+              let start_line_number =
+                current_doc
+                |> list.last
+                |> result.map(fn(pair) { pair.0 })
+                |> result.unwrap(line_no)
 
-                  let doc_lines =
-                    current_doc
-                    |> list.reverse
-                    |> list.map(fn(pair) { pair.1 })
+              let doc_lines =
+                current_doc
+                |> list.reverse
+                |> list.map(fn(pair) { pair.1 })
 
-                  let new_doc =
-                    DocBlock(
-                      lines: doc_lines,
-                      target: target,
-                      file: file,
-                      start_line: start_line_number,
-                      public_names: public_names,
-                      module_imports: module_imports,
-                    )
-                  #([new_doc, ..processed_docs], [])
-                }
-              }
+              let new_doc =
+                DocBlock(
+                  lines: doc_lines,
+                  target: target,
+                  file: file,
+                  start_line: start_line_number,
+                  public_names: public_names,
+                  module_imports: module_imports,
+                )
+
+              #([new_doc, ..processed_docs], [])
             }
           }
         }
@@ -212,7 +201,8 @@ fn extract_definition_name(line: String) -> Option(String) {
 fn try_extract_function_name(line: String) -> Result(String, Nil) {
   // Strip optional "pub " prefix, then require "fn ".
   let line =
-    string.split_once(line, "pub ")
+    line
+    |> string.split_once("pub ")
     |> result.map(fn(pair) { pair.1 })
     |> result.unwrap(line)
 
@@ -227,7 +217,8 @@ fn try_extract_function_name(line: String) -> Result(String, Nil) {
 fn try_extract_type_name(line: String) -> Result(String, Nil) {
   // Strip optional "pub " prefix, then require "type ".
   let line =
-    string.split_once(line, "pub ")
+    line
+    |> string.split_once("pub ")
     |> result.map(fn(pair) { pair.1 })
     |> result.unwrap(line)
 
@@ -235,12 +226,15 @@ fn try_extract_type_name(line: String) -> Result(String, Nil) {
 
   // Handle opaque types: "opaque type Name" — strip the extra keyword if present.
   let rest =
-    string.split_once(rest.1 |> string.trim_start, "opaque ")
+    rest.1
+    |> string.trim_start
+    |> string.split_once("opaque ")
     |> result.map(fn(pair) { pair.1 |> string.trim_start })
     |> result.unwrap(rest.1 |> string.trim_start)
 
   // The name ends at the first space, "{", or end-of-string.
-  string.split_once(rest, " ")
+  rest
+  |> string.split_once(" ")
   |> result.or(string.split_once(rest, "{"))
   |> result.map(fn(pair) { string.trim(pair.0) })
   |> result.unwrap(string.trim(rest))
@@ -250,14 +244,17 @@ fn try_extract_type_name(line: String) -> Result(String, Nil) {
 fn try_extract_const_name(line: String) -> Result(String, Nil) {
   // Strip optional "pub " prefix, then require "const ".
   let line =
-    string.split_once(line, "pub ")
+    line
+    |> string.split_once("pub ")
     |> result.map(fn(pair) { pair.1 })
     |> result.unwrap(line)
 
   use rest <- result.try(string.split_once(line, "const "))
 
   // The name ends at the first space, or end-of-string.
-  string.split_once(rest.1 |> string.trim_start, " ")
+  rest.1
+  |> string.trim_start
+  |> string.split_once(" ")
   |> result.map(fn(pair) { string.trim(pair.0) })
   |> result.unwrap(string.trim(rest.1))
   |> Ok

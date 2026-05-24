@@ -1,9 +1,9 @@
 import gleam/list
 import gleam/option.{Some}
 import gleam/string
-import gleedoc/extract.{DocBlock}
-import gleedoc/generate
-import gleedoc/parse.{CodeBlock}
+import gleedoc/internal/extract.{DocBlock}
+import gleedoc/internal/generate
+import gleedoc/internal/parse.{CodeBlock}
 import simplifile
 
 pub fn generate_single_test_file_test() {
@@ -30,12 +30,18 @@ pub fn generate_single_test_file_test() {
       language: "gleam",
       attributes: [],
       code: "let result = add(1, 2)\nlet assert True = result == 3",
+      code_line_offsets: [5, 6],
       source: doc,
       doc_line_offset: 3,
       imports: ["import math.{add}"],
     )
 
-  let config = generate.Config(output_dir: "test", extra_imports: [])
+  let config =
+    generate.Config(
+      output_dir: "test",
+      extra_imports: [],
+      source_mapped_errors: False,
+    )
 
   let assert Ok(paths) = generate.generate_tests([block], config)
   assert list.length(paths) == 1
@@ -77,12 +83,18 @@ pub fn generate_test_with_block_imports_test() {
       language: "gleam",
       attributes: [],
       code: "let d = dict.new()",
+      code_line_offsets: [5],
       source: doc,
       doc_line_offset: 3,
       imports: ["import gleam/dict"],
     )
 
-  let config = generate.Config(output_dir: "test", extra_imports: [])
+  let config =
+    generate.Config(
+      output_dir: "test",
+      extra_imports: [],
+      source_mapped_errors: False,
+    )
 
   let assert Ok(paths) = generate.generate_tests([block], config)
   assert list.length(paths) == 1
@@ -123,6 +135,7 @@ pub fn generate_test_with_overlapping_block_imports_test() {
       language: "gleam",
       attributes: [],
       code: "let result = add(1, 2)",
+      code_line_offsets: [6],
       source: doc1,
       doc_line_offset: 3,
       imports: ["import gleam/dict", "import math.{add}"],
@@ -151,12 +164,18 @@ pub fn generate_test_with_overlapping_block_imports_test() {
       language: "gleam",
       attributes: [],
       code: "let result = multiply(3, 4)",
+      code_line_offsets: [6],
       source: doc2,
       doc_line_offset: 3,
       imports: ["import gleam/dict", "import math.{multiply}"],
     )
 
-  let config = generate.Config(output_dir: "test", extra_imports: [])
+  let config =
+    generate.Config(
+      output_dir: "test",
+      extra_imports: [],
+      source_mapped_errors: False,
+    )
 
   let assert Ok(paths) = generate.generate_tests([block1, block2], config)
   assert list.length(paths) == 1
@@ -213,12 +232,18 @@ pub fn generate_includes_source_module_imports_test() {
       language: "gleam",
       attributes: [],
       code: "let alpha = Bear(id: 1, name: \"Alpha\", kind: \"Grizzly\", hibernating: False)\nlet beta  = Bear(id: 2, name: \"Beta\",  kind: \"Polar\",   hibernating: True)\nassert order_asc_by_name(alpha, beta) == order.Lt",
+      code_line_offsets: [4, 5, 6],
       source: doc,
       doc_line_offset: 3,
       imports: [],
     )
 
-  let config = generate.Config(output_dir: "test", extra_imports: [])
+  let config =
+    generate.Config(
+      output_dir: "test",
+      extra_imports: [],
+      source_mapped_errors: True,
+    )
 
   let assert Ok(paths) = generate.generate_tests([block], config)
   let assert [path] = paths
@@ -232,11 +257,71 @@ pub fn generate_includes_source_module_imports_test() {
   // gleam/string is carried over from the source module but filtered out
   // because no test body uses `string.something` — correct behaviour
   assert !string.contains(text, "import gleam/string")
-  // The snippet code must appear
+  // The snippet code must appear, with the source-mapped error annotation
+  // pointing at the exact source line of the assert (start_line=1 +
+  // offset 6 - 1 = 6).
   assert string.contains(
     text,
-    "assert order_asc_by_name(alpha, beta) == order.Lt",
+    "assert order_asc_by_name(alpha, beta) == order.Lt as \"dev/fixtures/bear.gleam:6\"",
   )
+
+  // Clean up
+  let _ = simplifile.delete(path)
+  Nil
+}
+
+/// When `source_mapped_errors` is `False`, generated `assert` lines must NOT
+/// be annotated with ` as "file:line"`. The rest of the generated test must
+/// still be correct.
+pub fn generate_without_source_mapped_errors_test() {
+  let doc =
+    DocBlock(
+      lines: [
+        "Compares two bears.",
+        "",
+        "```gleam",
+        "let alpha = Bear(id: 1, name: \"Alpha\", kind: \"Grizzly\", hibernating: False)",
+        "let beta  = Bear(id: 2, name: \"Beta\",  kind: \"Polar\",   hibernating: True)",
+        "assert order_asc_by_name(alpha, beta) == order.Lt",
+        "```",
+      ],
+      target: Some("order_asc_by_name"),
+      file: "dev/fixtures/bear.gleam",
+      start_line: 1,
+      public_names: ["Bear", "order_asc_by_name"],
+      module_imports: ["import gleam/order", "import gleam/string"],
+    )
+
+  let block =
+    CodeBlock(
+      language: "gleam",
+      attributes: [],
+      code: "let alpha = Bear(id: 1, name: \"Alpha\", kind: \"Grizzly\", hibernating: False)\nlet beta  = Bear(id: 2, name: \"Beta\",  kind: \"Polar\",   hibernating: True)\nassert order_asc_by_name(alpha, beta) == order.Lt",
+      code_line_offsets: [4, 5, 6],
+      source: doc,
+      doc_line_offset: 3,
+      imports: [],
+    )
+
+  let config =
+    generate.Config(
+      output_dir: "test",
+      extra_imports: [],
+      source_mapped_errors: False,
+    )
+
+  let assert Ok(paths) = generate.generate_tests([block], config)
+  let assert [path] = paths
+
+  let assert Ok(text) = simplifile.read(path)
+
+  // The bare assert line must appear without an ` as "..."` suffix.
+  assert string.contains(
+    text,
+    "assert order_asc_by_name(alpha, beta) == order.Lt\n",
+  )
+  // No source-mapped annotation anywhere in the generated file.
+  assert !string.contains(text, " as \"")
 
   // Clean up
   let _ = simplifile.delete(path)
@@ -273,12 +358,18 @@ pub fn generate_merges_snippet_and_module_imports_test() {
       language: "gleam",
       attributes: [],
       code: "let alpha = Bear(id: 1, name: \"Alpha\", kind: \"Grizzly\", hibernating: False)\nlet beta  = Bear(id: 2, name: \"Beta\",  kind: \"Polar\",   hibernating: True)\nassert order_asc_by_name(alpha, beta) == Lt",
+      code_line_offsets: [5, 6, 7],
       source: doc,
       doc_line_offset: 3,
       imports: ["import gleam/order.{Lt}"],
     )
 
-  let config = generate.Config(output_dir: "test", extra_imports: [])
+  let config =
+    generate.Config(
+      output_dir: "test",
+      extra_imports: [],
+      source_mapped_errors: False,
+    )
 
   let assert Ok(paths) = generate.generate_tests([block], config)
   let assert [path] = paths
@@ -304,7 +395,7 @@ pub fn generate_merges_snippet_and_module_imports_test() {
   Nil
 }
 
-/// Prelude imports configured in GleedocConfig should automatically be
+/// Extra imports configured in GleedocConfig should automatically be
 /// included in every generated test file. When the raw module name form
 /// (e.g. "gleam/dict") is used, it is automatically prefixed with
 /// "import ". Imports that are not referenced by the test code are still
@@ -331,21 +422,26 @@ pub fn generate_with_extra_imports_test() {
       language: "gleam",
       attributes: [],
       code: "let d = dict.new()",
+      code_line_offsets: [4],
       source: doc,
       doc_line_offset: 3,
       imports: [],
     )
 
-  // Pass prelude as a raw module name — generate.gleam will prefix it.
+  // Pass an extra import as a raw module name — generate.gleam will prefix it.
   let config =
-    generate.Config(output_dir: "test", extra_imports: ["gleam/dict"])
+    generate.Config(
+      output_dir: "test",
+      extra_imports: ["gleam/dict"],
+      source_mapped_errors: False,
+    )
 
   let assert Ok(paths) = generate.generate_tests([block], config)
   let assert [path] = paths
 
   let assert Ok(text) = simplifile.read(path)
 
-  // The prelude import should appear because dict.new() is used.
+  // The extra import should appear because dict.new() is used.
   assert string.contains(text, "import gleam/dict")
   assert string.contains(text, "let d = dict.new()")
 

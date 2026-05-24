@@ -11,217 +11,217 @@ import gleam/order.{Eq, Gt, Lt}
 
 // From: dev/fixtures/int.gleam:20
 pub fn absolute_value_1_test() {
-  assert absolute_value(-12) == 12 as "dev/fixtures/int.gleam:20"
+  assert absolute_value(-12) == 12 as "dev/fixtures/int.gleam:21"
 }
 
 // From: dev/fixtures/int.gleam:24
 pub fn absolute_value_2_test() {
-  assert absolute_value(10) == 10 as "dev/fixtures/int.gleam:24"
+  assert absolute_value(10) == 10 as "dev/fixtures/int.gleam:25"
 }
 
 // From: dev/fixtures/int.gleam:40
 pub fn power_3_test() {
-  assert power(2, -1.0) == Ok(0.5) as "dev/fixtures/int.gleam:40"
+  assert power(2, -1.0) == Ok(0.5) as "dev/fixtures/int.gleam:41"
 }
 
 // From: dev/fixtures/int.gleam:44
 pub fn power_4_test() {
-  assert power(2, 2.0) == Ok(4.0) as "dev/fixtures/int.gleam:44"
+  assert power(2, 2.0) == Ok(4.0) as "dev/fixtures/int.gleam:45"
 }
 
 // From: dev/fixtures/int.gleam:48
 pub fn power_5_test() {
-  assert power(8, 1.5) == Ok(22.627416997969522) as "dev/fixtures/int.gleam:48"
+  assert power(8, 1.5) == Ok(22.627416997969522) as "dev/fixtures/int.gleam:49"
 }
 
 // From: dev/fixtures/int.gleam:52
 pub fn power_6_test() {
-  assert 4 |> power(of: 2.0) == Ok(16.0) as "dev/fixtures/int.gleam:52"
+  assert 4 |> power(of: 2.0) == Ok(16.0) as "dev/fixtures/int.gleam:53"
 }
 
 // From: dev/fixtures/int.gleam:56
 pub fn power_7_test() {
-  assert power(-1, 0.5) == Error(Nil) as "dev/fixtures/int.gleam:56"
+  assert power(-1, 0.5) == Error(Nil) as "dev/fixtures/int.gleam:57"
 }
 
 // From: dev/fixtures/int.gleam:70
 pub fn square_root_8_test() {
-  assert square_root(4) == Ok(2.0) as "dev/fixtures/int.gleam:70"
+  assert square_root(4) == Ok(2.0) as "dev/fixtures/int.gleam:71"
 }
 
 // From: dev/fixtures/int.gleam:74
 pub fn square_root_9_test() {
-  assert square_root(-16) == Error(Nil) as "dev/fixtures/int.gleam:74"
+  assert square_root(-16) == Error(Nil) as "dev/fixtures/int.gleam:75"
 }
 
 // From: dev/fixtures/int.gleam:88
 pub fn module_10_test() {
-  assert parse("2") == Ok(2) as "dev/fixtures/int.gleam:88"
+  assert parse("2") == Ok(2) as "dev/fixtures/int.gleam:89"
 }
 
 // From: dev/fixtures/int.gleam:92
 pub fn module_11_test() {
-  assert parse("ABC") == Error(Nil) as "dev/fixtures/int.gleam:92"
+  assert parse("ABC") == Error(Nil) as "dev/fixtures/int.gleam:93"
 }
 
 // From: dev/fixtures/int.gleam:105
 pub fn base_parse_12_test() {
-  assert base_parse("10", 2) == Ok(2) as "dev/fixtures/int.gleam:105"
+  assert base_parse("10", 2) == Ok(2) as "dev/fixtures/int.gleam:106"
 }
 
 // From: dev/fixtures/int.gleam:109
 pub fn base_parse_13_test() {
-  assert base_parse("30", 16) == Ok(48) as "dev/fixtures/int.gleam:109"
+  assert base_parse("30", 16) == Ok(48) as "dev/fixtures/int.gleam:110"
 }
 
 // From: dev/fixtures/int.gleam:113
 pub fn base_parse_14_test() {
-  assert base_parse("1C", 36) == Ok(48) as "dev/fixtures/int.gleam:113"
+  assert base_parse("1C", 36) == Ok(48) as "dev/fixtures/int.gleam:114"
 }
 
 // From: dev/fixtures/int.gleam:117
 pub fn base_parse_15_test() {
-  assert base_parse("48", 1) == Error(Nil) as "dev/fixtures/int.gleam:117"
+  assert base_parse("48", 1) == Error(Nil) as "dev/fixtures/int.gleam:118"
 }
 
 // From: dev/fixtures/int.gleam:121
 pub fn base_parse_16_test() {
-  assert base_parse("48", 37) == Error(Nil) as "dev/fixtures/int.gleam:121"
+  assert base_parse("48", 37) == Error(Nil) as "dev/fixtures/int.gleam:122"
 }
 
 // From: dev/fixtures/int.gleam:140
 pub fn module_17_test() {
-  assert to_string(2) == "2" as "dev/fixtures/int.gleam:140"
+  assert to_string(2) == "2" as "dev/fixtures/int.gleam:141"
 }
 
 // From: dev/fixtures/int.gleam:154
 pub fn to_base_string_18_test() {
-  assert to_base_string(2, 2) == Ok("10") as "dev/fixtures/int.gleam:154"
+  assert to_base_string(2, 2) == Ok("10") as "dev/fixtures/int.gleam:155"
 }
 
 // From: dev/fixtures/int.gleam:158
 pub fn to_base_string_19_test() {
-  assert to_base_string(48, 16) == Ok("30") as "dev/fixtures/int.gleam:158"
+  assert to_base_string(48, 16) == Ok("30") as "dev/fixtures/int.gleam:159"
 }
 
 // From: dev/fixtures/int.gleam:162
 pub fn to_base_string_20_test() {
-  assert to_base_string(48, 36) == Ok("1C") as "dev/fixtures/int.gleam:162"
+  assert to_base_string(48, 36) == Ok("1C") as "dev/fixtures/int.gleam:163"
 }
 
 // From: dev/fixtures/int.gleam:166
 pub fn to_base_string_21_test() {
-  assert to_base_string(48, 1) == Error(Nil) as "dev/fixtures/int.gleam:166"
+  assert to_base_string(48, 1) == Error(Nil) as "dev/fixtures/int.gleam:167"
 }
 
 // From: dev/fixtures/int.gleam:170
 pub fn to_base_string_22_test() {
-  assert to_base_string(48, 37) == Error(Nil) as "dev/fixtures/int.gleam:170"
+  assert to_base_string(48, 37) == Error(Nil) as "dev/fixtures/int.gleam:171"
 }
 
 // From: dev/fixtures/int.gleam:189
 pub fn to_base2_23_test() {
-  assert to_base2(2) == "10" as "dev/fixtures/int.gleam:189"
+  assert to_base2(2) == "10" as "dev/fixtures/int.gleam:190"
 }
 
 // From: dev/fixtures/int.gleam:201
 pub fn to_base8_24_test() {
-  assert to_base8(15) == "17" as "dev/fixtures/int.gleam:201"
+  assert to_base8(15) == "17" as "dev/fixtures/int.gleam:202"
 }
 
 // From: dev/fixtures/int.gleam:213
 pub fn to_base16_25_test() {
-  assert to_base16(48) == "30" as "dev/fixtures/int.gleam:213"
+  assert to_base16(48) == "30" as "dev/fixtures/int.gleam:214"
 }
 
 // From: dev/fixtures/int.gleam:225
 pub fn to_base36_26_test() {
-  assert to_base36(48) == "1C" as "dev/fixtures/int.gleam:225"
+  assert to_base36(48) == "1C" as "dev/fixtures/int.gleam:226"
 }
 
 // From: dev/fixtures/int.gleam:237
 pub fn module_27_test() {
-  assert to_float(5) == 5.0 as "dev/fixtures/int.gleam:237"
+  assert to_float(5) == 5.0 as "dev/fixtures/int.gleam:238"
 }
 
 // From: dev/fixtures/int.gleam:241
 pub fn module_28_test() {
-  assert to_float(0) == 0.0 as "dev/fixtures/int.gleam:241"
+  assert to_float(0) == 0.0 as "dev/fixtures/int.gleam:242"
 }
 
 // From: dev/fixtures/int.gleam:245
 pub fn module_29_test() {
-  assert to_float(-3) == -3.0 as "dev/fixtures/int.gleam:245"
+  assert to_float(-3) == -3.0 as "dev/fixtures/int.gleam:246"
 }
 
 // From: dev/fixtures/int.gleam:261
 pub fn clamp_30_test() {
-  assert clamp(40, min: 50, max: 60) == 50 as "dev/fixtures/int.gleam:261"
+  assert clamp(40, min: 50, max: 60) == 50 as "dev/fixtures/int.gleam:262"
 }
 
 // From: dev/fixtures/int.gleam:265
 pub fn clamp_31_test() {
-  assert clamp(40, min: 50, max: 30) == 40 as "dev/fixtures/int.gleam:265"
+  assert clamp(40, min: 50, max: 30) == 40 as "dev/fixtures/int.gleam:266"
 }
 
 // From: dev/fixtures/int.gleam:280
 pub fn compare_32_test() {
-  assert compare(2, 3) == Lt as "dev/fixtures/int.gleam:280"
+  assert compare(2, 3) == Lt as "dev/fixtures/int.gleam:283"
 }
 
 // From: dev/fixtures/int.gleam:286
 pub fn compare_33_test() {
-  assert compare(4, 3) == Gt as "dev/fixtures/int.gleam:286"
+  assert compare(4, 3) == Gt as "dev/fixtures/int.gleam:289"
 }
 
 // From: dev/fixtures/int.gleam:292
 pub fn compare_34_test() {
-  assert compare(3, 3) == Eq as "dev/fixtures/int.gleam:292"
+  assert compare(3, 3) == Eq as "dev/fixtures/int.gleam:295"
 }
 
 // From: dev/fixtures/int.gleam:313
 pub fn min_35_test() {
-  assert min(2, 3) == 2 as "dev/fixtures/int.gleam:313"
+  assert min(2, 3) == 2 as "dev/fixtures/int.gleam:314"
 }
 
 // From: dev/fixtures/int.gleam:328
 pub fn max_36_test() {
-  assert max(2, 3) == 3 as "dev/fixtures/int.gleam:328"
+  assert max(2, 3) == 3 as "dev/fixtures/int.gleam:329"
 }
 
 // From: dev/fixtures/int.gleam:343
 pub fn is_even_37_test() {
-  assert is_even(2) as "dev/fixtures/int.gleam:343"
+  assert is_even(2) as "dev/fixtures/int.gleam:344"
 }
 
 // From: dev/fixtures/int.gleam:347
 pub fn is_even_38_test() {
-  assert !is_even(3) as "dev/fixtures/int.gleam:347"
+  assert !is_even(3) as "dev/fixtures/int.gleam:348"
 }
 
 // From: dev/fixtures/int.gleam:359
 pub fn is_odd_39_test() {
-  assert is_odd(3) as "dev/fixtures/int.gleam:359"
+  assert is_odd(3) as "dev/fixtures/int.gleam:360"
 }
 
 // From: dev/fixtures/int.gleam:363
 pub fn is_odd_40_test() {
-  assert !is_odd(2) as "dev/fixtures/int.gleam:363"
+  assert !is_odd(2) as "dev/fixtures/int.gleam:364"
 }
 
 // From: dev/fixtures/int.gleam:375
 pub fn negate_41_test() {
-  assert negate(1) == -1 as "dev/fixtures/int.gleam:375"
+  assert negate(1) == -1 as "dev/fixtures/int.gleam:376"
 }
 
 // From: dev/fixtures/int.gleam:387
 pub fn sum_42_test() {
-  assert sum([1, 2, 3]) == 6 as "dev/fixtures/int.gleam:387"
+  assert sum([1, 2, 3]) == 6 as "dev/fixtures/int.gleam:388"
 }
 
 // From: dev/fixtures/int.gleam:406
 pub fn product_43_test() {
-  assert product([2, 3, 4]) == 24 as "dev/fixtures/int.gleam:406"
+  assert product([2, 3, 4]) == 24 as "dev/fixtures/int.gleam:407"
 }
 
 // From: dev/fixtures/int.gleam:427
@@ -244,168 +244,168 @@ pub fn random_46_test() {
 
 // From: dev/fixtures/int.gleam:455
 pub fn divide_47_test() {
-  assert divide(0, 1) == Ok(0) as "dev/fixtures/int.gleam:455"
+  assert divide(0, 1) == Ok(0) as "dev/fixtures/int.gleam:456"
 }
 
 // From: dev/fixtures/int.gleam:459
 pub fn divide_48_test() {
-  assert divide(1, 0) == Error(Nil) as "dev/fixtures/int.gleam:459"
+  assert divide(1, 0) == Error(Nil) as "dev/fixtures/int.gleam:460"
 }
 
 // From: dev/fixtures/int.gleam:463
 pub fn divide_49_test() {
-  assert divide(5, 2) == Ok(2) as "dev/fixtures/int.gleam:463"
+  assert divide(5, 2) == Ok(2) as "dev/fixtures/int.gleam:464"
 }
 
 // From: dev/fixtures/int.gleam:467
 pub fn divide_50_test() {
-  assert divide(-99, 2) == Ok(-49) as "dev/fixtures/int.gleam:467"
+  assert divide(-99, 2) == Ok(-49) as "dev/fixtures/int.gleam:468"
 }
 
 // From: dev/fixtures/int.gleam:488
 pub fn remainder_51_test() {
-  assert remainder(3, 2) == Ok(1) as "dev/fixtures/int.gleam:488"
+  assert remainder(3, 2) == Ok(1) as "dev/fixtures/int.gleam:489"
 }
 
 // From: dev/fixtures/int.gleam:492
 pub fn remainder_52_test() {
-  assert remainder(1, 0) == Error(Nil) as "dev/fixtures/int.gleam:492"
+  assert remainder(1, 0) == Error(Nil) as "dev/fixtures/int.gleam:493"
 }
 
 // From: dev/fixtures/int.gleam:496
 pub fn remainder_53_test() {
-  assert remainder(10, -1) == Ok(0) as "dev/fixtures/int.gleam:496"
+  assert remainder(10, -1) == Ok(0) as "dev/fixtures/int.gleam:497"
 }
 
 // From: dev/fixtures/int.gleam:500
 pub fn remainder_54_test() {
-  assert remainder(13, by: 3) == Ok(1) as "dev/fixtures/int.gleam:500"
+  assert remainder(13, by: 3) == Ok(1) as "dev/fixtures/int.gleam:501"
 }
 
 // From: dev/fixtures/int.gleam:504
 pub fn remainder_55_test() {
-  assert remainder(-13, by: 3) == Ok(-1) as "dev/fixtures/int.gleam:504"
+  assert remainder(-13, by: 3) == Ok(-1) as "dev/fixtures/int.gleam:505"
 }
 
 // From: dev/fixtures/int.gleam:508
 pub fn remainder_56_test() {
-  assert remainder(13, by: -3) == Ok(1) as "dev/fixtures/int.gleam:508"
+  assert remainder(13, by: -3) == Ok(1) as "dev/fixtures/int.gleam:509"
 }
 
 // From: dev/fixtures/int.gleam:512
 pub fn remainder_57_test() {
-  assert remainder(-13, by: -3) == Ok(-1) as "dev/fixtures/int.gleam:512"
+  assert remainder(-13, by: -3) == Ok(-1) as "dev/fixtures/int.gleam:513"
 }
 
 // From: dev/fixtures/int.gleam:533
 pub fn modulo_58_test() {
-  assert modulo(3, 2) == Ok(1) as "dev/fixtures/int.gleam:533"
+  assert modulo(3, 2) == Ok(1) as "dev/fixtures/int.gleam:534"
 }
 
 // From: dev/fixtures/int.gleam:537
 pub fn modulo_59_test() {
-  assert modulo(1, 0) == Error(Nil) as "dev/fixtures/int.gleam:537"
+  assert modulo(1, 0) == Error(Nil) as "dev/fixtures/int.gleam:538"
 }
 
 // From: dev/fixtures/int.gleam:541
 pub fn modulo_60_test() {
-  assert modulo(10, -1) == Ok(0) as "dev/fixtures/int.gleam:541"
+  assert modulo(10, -1) == Ok(0) as "dev/fixtures/int.gleam:542"
 }
 
 // From: dev/fixtures/int.gleam:545
 pub fn modulo_61_test() {
-  assert modulo(13, by: 3) == Ok(1) as "dev/fixtures/int.gleam:545"
+  assert modulo(13, by: 3) == Ok(1) as "dev/fixtures/int.gleam:546"
 }
 
 // From: dev/fixtures/int.gleam:549
 pub fn modulo_62_test() {
-  assert modulo(-13, by: 3) == Ok(2) as "dev/fixtures/int.gleam:549"
+  assert modulo(-13, by: 3) == Ok(2) as "dev/fixtures/int.gleam:550"
 }
 
 // From: dev/fixtures/int.gleam:553
 pub fn modulo_63_test() {
-  assert modulo(13, by: -3) == Ok(-2) as "dev/fixtures/int.gleam:553"
+  assert modulo(13, by: -3) == Ok(-2) as "dev/fixtures/int.gleam:554"
 }
 
 // From: dev/fixtures/int.gleam:581
 pub fn floor_divide_64_test() {
-  assert floor_divide(1, 0) == Error(Nil) as "dev/fixtures/int.gleam:581"
+  assert floor_divide(1, 0) == Error(Nil) as "dev/fixtures/int.gleam:582"
 }
 
 // From: dev/fixtures/int.gleam:585
 pub fn floor_divide_65_test() {
-  assert floor_divide(5, 2) == Ok(2) as "dev/fixtures/int.gleam:585"
+  assert floor_divide(5, 2) == Ok(2) as "dev/fixtures/int.gleam:586"
 }
 
 // From: dev/fixtures/int.gleam:589
 pub fn floor_divide_66_test() {
-  assert floor_divide(6, -4) == Ok(-2) as "dev/fixtures/int.gleam:589"
+  assert floor_divide(6, -4) == Ok(-2) as "dev/fixtures/int.gleam:590"
 }
 
 // From: dev/fixtures/int.gleam:593
 pub fn floor_divide_67_test() {
-  assert floor_divide(-99, 2) == Ok(-50) as "dev/fixtures/int.gleam:593"
+  assert floor_divide(-99, 2) == Ok(-50) as "dev/fixtures/int.gleam:594"
 }
 
 // From: dev/fixtures/int.gleam:615
 pub fn add_68_test() {
-  assert add(1, 2) == 3 as "dev/fixtures/int.gleam:615"
+  assert add(1, 2) == 3 as "dev/fixtures/int.gleam:616"
 }
 
 // From: dev/fixtures/int.gleam:619
 pub fn add_69_test() {
-  assert list.fold([1, 2, 3], 0, add) == 6 as "dev/fixtures/int.gleam:619"
+  assert list.fold([1, 2, 3], 0, add) == 6 as "dev/fixtures/int.gleam:621"
 }
 
 // From: dev/fixtures/int.gleam:624
 pub fn add_70_test() {
-  assert 3 |> add(2) == 5 as "dev/fixtures/int.gleam:624"
+  assert 3 |> add(2) == 5 as "dev/fixtures/int.gleam:625"
 }
 
 // From: dev/fixtures/int.gleam:639
 pub fn multiply_71_test() {
-  assert multiply(2, 4) == 8 as "dev/fixtures/int.gleam:639"
+  assert multiply(2, 4) == 8 as "dev/fixtures/int.gleam:640"
 }
 
 // From: dev/fixtures/int.gleam:643
 pub fn multiply_72_test() {
-  assert list.fold([2, 3, 4], 1, multiply) == 24 as "dev/fixtures/int.gleam:643"
+  assert list.fold([2, 3, 4], 1, multiply) == 24 as "dev/fixtures/int.gleam:646"
 }
 
 // From: dev/fixtures/int.gleam:649
 pub fn multiply_73_test() {
-  assert 3 |> multiply(2) == 6 as "dev/fixtures/int.gleam:649"
+  assert 3 |> multiply(2) == 6 as "dev/fixtures/int.gleam:650"
 }
 
 // From: dev/fixtures/int.gleam:664
 pub fn subtract_74_test() {
-  assert subtract(3, 1) == 2 as "dev/fixtures/int.gleam:664"
+  assert subtract(3, 1) == 2 as "dev/fixtures/int.gleam:665"
 }
 
 // From: dev/fixtures/int.gleam:668
 pub fn subtract_75_test() {
-  assert list.fold([1, 2, 3], 10, subtract) == 4 as "dev/fixtures/int.gleam:668"
+  assert list.fold([1, 2, 3], 10, subtract) == 4 as "dev/fixtures/int.gleam:671"
 }
 
 // From: dev/fixtures/int.gleam:674
 pub fn subtract_76_test() {
-  assert 3 |> subtract(2) == 1 as "dev/fixtures/int.gleam:674"
+  assert 3 |> subtract(2) == 1 as "dev/fixtures/int.gleam:675"
 }
 
 // From: dev/fixtures/int.gleam:678
 pub fn subtract_77_test() {
-  assert 3 |> subtract(2, _) == -1 as "dev/fixtures/int.gleam:678"
+  assert 3 |> subtract(2, _) == -1 as "dev/fixtures/int.gleam:679"
 }
 
 // From: dev/fixtures/int.gleam:794
 pub fn range_78_test() {
   let outcome =
     range(from: 0, to: 3, with: "", run: fn(acc, i) { acc <> to_string(i) })
-  assert outcome == "012" as "dev/fixtures/int.gleam:794"
+  assert outcome == "012" as "dev/fixtures/int.gleam:799"
 }
 
-// From: dev/fixtures/int.gleam:799
+// From: dev/fixtures/int.gleam:802
 pub fn range_79_test() {
   assert range(from: 1, to: -2, with: [], run: list.prepend) == [-1, 0, 1]
-    as "dev/fixtures/int.gleam:799"
+    as "dev/fixtures/int.gleam:803"
 }

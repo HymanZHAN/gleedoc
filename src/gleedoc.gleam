@@ -1,13 +1,14 @@
 import argv
 import envoy
 import filepath
+import gleam/bool
 import gleam/io
 import gleam/list
 import gleam/result
 import gleam/string
-import gleedoc/extract
-import gleedoc/generate.{Config}
-import gleedoc/parse
+import gleedoc/internal/extract
+import gleedoc/internal/generate.{Config}
+import gleedoc/internal/parse
 import shellout.{LetBeStderr, LetBeStdout, SetEnvironment}
 import simplifile
 import snag
@@ -17,19 +18,24 @@ import snag
 /// invocation that should actually compile and execute the tests (unset).
 const test_generation_running = "GLEEDOC_GENERATION_RUNNING"
 
-/// Configuration for a gleedoc run.
+/// Configuration for a `gleedoc` run.
 pub type GleedocConfig {
   GleedocConfig(
     /// A list of imports that will automatically be applied to every generated test file.
     /// Example: `["gleam/int", "gleam/otp/actor"]`
     extra_imports: List(String),
-    /// Directory to read source files from, typically "src"
+    /// Directory to read source files from, typically `"src"`
     source_dir: String,
-    /// Directory to write generated tests to, typically "test"
+    /// Directory to write generated tests to, typically `"test"`
     output_dir: String,
     /// Whether to preserve generated test files in `output_dir` after doc tests finish.
     /// If you are running `gleedoc.run` programmatically, please always set this to `True`.
     preserve_tests: Bool,
+    /// Whether to annotate each generated `assert` with `as "file:line"`,
+    /// pointing back to the exact source line of the assertion in the doc
+    /// comment. When `True` (the default), test failures are reported against
+    /// the original source file/line rather than the generated test file.
+    source_mapped_errors: Bool,
   )
 }
 
@@ -38,16 +44,105 @@ pub type GleedocConfig {
 /// - `output_dir`: `"test"`
 /// - `extra_imports`: `[]`
 /// - `preserve_tests`: `False`
+/// - `source_mapped_errors`: `True`
 pub fn default() -> GleedocConfig {
   GleedocConfig(
     output_dir: "test",
     source_dir: "src",
     extra_imports: [],
     preserve_tests: False,
+    source_mapped_errors: True,
   )
 }
 
-/// CLI entry point
+/// Start a new `GleedocConfig` builder using the same defaults as
+/// [`default`](#default). Intended to be the entry point of the builder
+/// pipeline:
+///
+/// ## Example
+///
+/// ```gleam
+/// gleedoc.new()
+/// |> gleedoc.with_source_dir("src")
+/// |> gleedoc.run
+/// ```
+pub fn new() -> GleedocConfig {
+  default()
+}
+
+/// Set the directory `gleedoc` reads source files from.
+pub fn with_source_dir(
+  config: GleedocConfig,
+  source_dir: String,
+) -> GleedocConfig {
+  GleedocConfig(..config, source_dir: source_dir)
+}
+
+/// Set the directory `gleedoc` writes generated tests to.
+pub fn with_output_dir(
+  config: GleedocConfig,
+  output_dir: String,
+) -> GleedocConfig {
+  GleedocConfig(..config, output_dir: output_dir)
+}
+
+/// Replace the list of extra imports added to every generated test file.
+///
+/// To add a single import instead of replacing the whole list, use
+/// [`add_extra_import`](#add_extra_import).
+pub fn with_extra_imports(
+  config: GleedocConfig,
+  extra_imports: List(String),
+) -> GleedocConfig {
+  GleedocConfig(..config, extra_imports: extra_imports)
+}
+
+/// Add a single import to `extra_imports`. Convenient when chaining
+/// multiple imports through the builder pipeline.
+///
+/// ## Example
+///
+/// ```gleam
+/// gleedoc.new()
+/// |> gleedoc.add_extra_import("gleam/int")
+/// |> gleedoc.add_extra_import("gleam/string")
+/// ```
+pub fn add_extra_import(
+  config: GleedocConfig,
+  import_path: String,
+) -> GleedocConfig {
+  GleedocConfig(
+    ..config,
+    extra_imports: config.extra_imports |> list.prepend(import_path),
+  )
+}
+
+/// Set whether generated test files should be preserved in `output_dir`
+/// after doc tests finish.
+pub fn with_preserve_tests(
+  config: GleedocConfig,
+  preserve_tests: Bool,
+) -> GleedocConfig {
+  GleedocConfig(..config, preserve_tests: preserve_tests)
+}
+
+/// Set whether each generated `assert` should be annotated with
+/// `as "file:line"`, so test failures are reported against the original
+/// source file and line.
+pub fn with_source_mapped_errors(
+  config: GleedocConfig,
+  source_mapped_errors: Bool,
+) -> GleedocConfig {
+  GleedocConfig(..config, source_mapped_errors: source_mapped_errors)
+}
+
+/// Entry point for `gleam run -m gleedoc`.
+/// It's essentially executing the `run` function using the `default` config
+/// with `preserve_tests` set to `True`.
+///
+/// ```gleam
+/// let config = GleedocConfig(..default(), preserve_tests: True)
+/// ```
 pub fn main() -> Nil {
   let config = GleedocConfig(..default(), preserve_tests: True)
 
@@ -57,8 +152,26 @@ pub fn main() -> Nil {
   }
 }
 
-/// Run gleedoc on a project, extracting doc tests from source files and generating
+/// Run `gleedoc` on a project, extracting doc tests from source files and generating
 /// test files in the output directory.
+///
+/// ## Example
+///
+/// ```gleam
+/// import gleedoc
+///
+/// pub fn main() {
+///   let config =
+///     gleedoc.GleedocConfig(
+///       output_dir: "test/integration",
+///       source_dir: "dev/fixtures",
+///       extra_imports: ["gleam/int"],
+///       preserve_tests: True,
+///       source_mapped_errors: True,
+///     )
+///   let assert Ok(_) = gleedoc.run(config)
+/// }
+/// ```
 pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
   // Find all gleam source files
   use files <- result.try(find_gleam_files(config.source_dir))
@@ -87,6 +200,7 @@ pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
         Config(
           output_dir: config.output_dir,
           extra_imports: config.extra_imports,
+          source_mapped_errors: config.source_mapped_errors,
         )
       use _ <- result.try(generate.generate_tests(blocks, gen_config))
 
@@ -98,19 +212,30 @@ pub fn run(config: GleedocConfig) -> Result(Nil, snag.Snag) {
   }
 }
 
-/// Run gleedoc and then execute the project's tests.
+/// Run `gleedoc` with `gleeunit.main`, so one `gleam test` command will
+/// take care of both doc tests and unit tests.
 ///
-/// Because `gleam test` does not pick up newly-generated test files within the
-/// same compilation, this function uses a two-pass strategy controlled by the
-/// `GLEEDOC_GENERATION_RUNNING` environment variable:
+/// ## Example
 ///
-/// 1. First pass (env var unset): generate the test files, set the env var,
-///    then re-invoke `gleam test` via `shellout`, forwarding any CLI
-///    arguments captured with `argv`. The original process does not run
-///    `test_main` itself.
-/// 2. Second pass (env var set): skip generation, unset the env var, and
-///    invoke `test_main` directly so the freshly-generated tests run.
+/// ```gleam
+/// import gleedoc
+/// import gleeunit
+///
+/// pub fn main() {
+///   gleedoc.default() |> gleedoc.run_with(gleeunit.main)
+/// }
+/// ```
 pub fn run_with(config: GleedocConfig, test_main: fn() -> Nil) -> Nil {
+  // Because `gleam test` does not pick up newly-generated test files within the
+  // same compilation, this function uses a two-pass strategy controlled by the
+  // `GLEEDOC_GENERATION_RUNNING` environment variable:
+  //
+  // 1. First pass (env var unset): generate the test files, set the env var,
+  //    then re-invoke `gleam test` via `shellout`, forwarding any CLI
+  //    arguments captured with `argv`. The original process does not run
+  //    `test_main` itself.
+  // 2. Second pass (env var set): skip generation, unset the env var, and
+  //    invoke `test_main` directly so the freshly-generated tests run.
   let forwarded_args = argv.load().arguments
   run_with_inner(config, test_main, forwarded_args)
 }
@@ -144,28 +269,7 @@ fn run_with_inner(
               ],
             )
           case result {
-            Ok(_) -> {
-              case config.preserve_tests {
-                False -> {
-                  let generated_dir =
-                    filepath.join(config.output_dir, "gleedoc")
-                  case simplifile.delete(generated_dir) {
-                    Ok(_) -> Nil
-                    Error(simplifile.Enoent) -> Nil
-                    Error(err) -> {
-                      io.println_error(
-                        "Warning: failed to clean generated tests at "
-                        <> generated_dir
-                        <> ": "
-                        <> simplifile.describe_error(err),
-                      )
-                      Nil
-                    }
-                  }
-                }
-                True -> Nil
-              }
-            }
+            Ok(_) -> clean_generated_tests(config)
             Error(#(status, message)) -> {
               case message {
                 "" -> Nil
@@ -184,6 +288,28 @@ fn find_gleam_files(source_dir: String) -> Result(List(String), snag.Snag) {
   find_gleam_files_loop(source_dir, [])
 }
 
+/// Best-effort cleanup of generated test files after the test run.
+/// When `preserve_tests` is `True`, this is a no-op.
+fn clean_generated_tests(config: GleedocConfig) -> Nil {
+  use <- bool.guard(when: config.preserve_tests, return: Nil)
+
+  let generated_dir = config.output_dir |> filepath.join("gleedoc")
+
+  case simplifile.delete(generated_dir) {
+    Ok(_) -> Nil
+    Error(simplifile.Enoent) -> Nil
+    Error(err) -> {
+      io.println_error(
+        "Warning: failed to clean generated tests at "
+        <> generated_dir
+        <> ": "
+        <> simplifile.describe_error(err),
+      )
+      Nil
+    }
+  }
+}
+
 fn find_gleam_files_loop(
   dir: String,
   acc: List(String),
@@ -193,7 +319,10 @@ fn find_gleam_files_loop(
     |> simplifile.read_directory
     |> result.map_error(fn(err) {
       snag.new(
-        "Failed to read directory: " <> dir <> " - " <> string.inspect(err),
+        "Failed to read directory: "
+        <> dir
+        <> " - "
+        <> simplifile.describe_error(err),
       )
     }),
   )
@@ -205,7 +334,9 @@ fn find_gleam_files_loop(
       path
       |> simplifile.is_directory
       |> result.map_error(fn(err) {
-        snag.new("Failed to stat: " <> path <> " - " <> string.inspect(err))
+        snag.new(
+          "Failed to stat: " <> path <> " - " <> simplifile.describe_error(err),
+        )
       }),
     )
 

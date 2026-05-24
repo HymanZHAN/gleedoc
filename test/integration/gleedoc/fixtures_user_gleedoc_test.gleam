@@ -7,8 +7,8 @@ import gleam/string
 // From: dev/fixtures/user.gleam:5
 pub fn greet_1_test() {
   let name = Some("Alice")
-  assert greet(name) == "Hello, Alice!" as "dev/fixtures/user.gleam:5"
+  assert greet(name) == "Hello, Alice!" as "dev/fixtures/user.gleam:9"
 
   let assert [greet, ..] = string.split(greet(name), ",")
-  assert greet == "Hello" as "dev/fixtures/user.gleam:5"
+  assert greet == "Hello" as "dev/fixtures/user.gleam:12"
 }

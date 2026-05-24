@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.0.0] - 2026-05-24
+
+### <!-- 0 -->🚀 Features
+
+- Enhance source-mapping to pin-point the exact `assert` in doc
+- New `source_mapped_errors` config
+- New builder API
+
+### <!-- 2 -->🚜 Refactor
+
+- Create `internal` module
+- Simplify logic around trimming white spaces
+- Clean up nesting with bool.guard
+- Replace list.append with list.prepend
+- Enhance group_by_file; consistent file error
+
+### <!-- 3 -->📚 Documentation
+
+- Fix README
+- Refactor README
+- Add config for deno
+- Refined docs
+- Fix inconsistencies
+
+### <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- Format files
+- Minimize doc diff with gleam/int
+- Clean up
+- Clear inconsistencies
+- Minor docs and comments clean up
+
 ## [0.6.0] - 2026-05-21
 
 ### <!-- 0 -->🚀 Features

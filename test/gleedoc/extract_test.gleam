@@ -1,6 +1,6 @@
 import gleam/list
 import gleam/option.{None, Some}
-import gleedoc/extract
+import gleedoc/internal/extract
 
 const fixture = "dev/fixtures/example.gleam"
 
@@ -43,12 +43,12 @@ pub fn extract_add_block_lines_test() {
   assert add_block.target == Some("add")
   assert add_block.lines
     == [
-      "A simple example module demonstrating gleedoc.",
+      " A simple example module demonstrating gleedoc.",
       "",
-      "```gleam",
-      "let result = add(1, 2)",
-      "assert result == 3",
-      "```",
+      " ```gleam",
+      " let result = add(1, 2)",
+      " assert result == 3",
+      " ```",
     ]
 }
 
@@ -60,12 +60,12 @@ pub fn extract_multiply_block_lines_test() {
   assert multiply_block.target == Some("multiply")
   assert multiply_block.lines
     == [
-      "Multiply two numbers.",
+      " Multiply two numbers.",
       "",
-      "```gleam",
-      "let result = multiply(3, 4)",
-      "assert result == 12",
-      "```",
+      " ```gleam",
+      " let result = multiply(3, 4)",
+      " assert result == 12",
+      " ```",
     ]
 }
 
@@ -77,12 +77,12 @@ pub fn extract_greet_block_lines_test() {
   assert greet_block.target == Some("greet")
   assert greet_block.lines
     == [
-      "Greet a user by name.",
+      " Greet a user by name.",
       "",
-      "```gleam",
-      "let msg = greet(\"Alice\")",
-      "assert msg == \"Hello, Alice!\"",
-      "```",
+      " ```gleam",
+      " let msg = greet(\"Alice\")",
+      " assert msg == \"Hello, Alice!\"",
+      " ```",
     ]
 }
 
@@ -95,19 +95,19 @@ pub fn extract_find_block_lines_test() {
   assert find_block.start_line == 38
   assert find_block.lines
     == [
-      "Find a user by user ID.",
+      " Find a user by user ID.",
       "",
-      "```gleam",
-      "let john = User(\"John\", \"Doe\")",
-      "let bill = User(\"Bill\", \"Wilson\")",
+      " ```gleam",
+      " let john = User(\"John\", \"Doe\")",
+      " let bill = User(\"Bill\", \"Wilson\")",
       "",
-      "let users =",
-      "  [#(\"bill_wilson\", bill), #(\"john_doe\", john)]",
-      "  |> dict.from_list",
+      " let users =",
+      "   [#(\"bill_wilson\", bill), #(\"john_doe\", john)]",
+      "   |> dict.from_list",
       "",
-      "assert users |> find(\"hello\") == User(\"\", \"\")",
-      "assert users |> find(\"john_doe\") == john",
-      "```",
+      " assert users |> find(\"hello\") == User(\"\", \"\")",
+      " assert users |> find(\"john_doe\") == john",
+      " ```",
     ]
 }
 
@@ -132,7 +132,7 @@ pub fn extract_module_doc_test() {
   assert module_block.start_line == 1
 
   let assert [first_line, ..] = module_block.lines
-  assert first_line == "A simple key-value store backed by a dictionary."
+  assert first_line == " A simple key-value store backed by a dictionary."
 
   assert module_block.target == None
 }

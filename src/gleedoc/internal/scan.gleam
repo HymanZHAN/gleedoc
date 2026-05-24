@@ -6,10 +6,6 @@ import gleam/set.{type Set}
 import gleam/string
 import snag
 
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
-
 /// Scan a Gleam source file and extract all public definition names.
 pub fn public_names(
   file_path: String,
@@ -68,7 +64,7 @@ pub fn module_imports(
 }
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Gleam module parsing helpers
 // ---------------------------------------------------------------------------
 
 fn parse_module(
@@ -93,8 +89,6 @@ fn if_public(publicity: glance.Publicity, name: String) -> Result(String, Nil) {
 /// module or unqualified names are never actually referenced in the code.
 /// Returns the cleaned source text, or the original if parsing fails.
 pub fn remove_unused_imports(source: String) -> String {
-  // Normalise Windows line endings so all internal processing uses "\n".
-  let source = string.replace(source, "\r\n", "\n")
   case glance.module(source) {
     Error(_) -> source
     Ok(parsed) -> {

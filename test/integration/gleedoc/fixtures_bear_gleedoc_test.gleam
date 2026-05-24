@@ -9,7 +9,7 @@ pub fn order_asc_by_name_1_test() {
   let beta = Bear(id: 2, name: "Beta", kind: "Polar", hibernating: True)
 
   assert order_asc_by_name(alpha, beta) == order.Lt
-    as "dev/fixtures/bear.gleam:16"
+    as "dev/fixtures/bear.gleam:22"
 }
 
 // From: dev/fixtures/bear.gleam:25
@@ -18,7 +18,7 @@ pub fn order_asc_by_name_2_test() {
   let beta = Bear(id: 2, name: "Zara", kind: "Polar", hibernating: True)
 
   assert order_asc_by_name(alpha, beta) == order.Eq
-    as "dev/fixtures/bear.gleam:25"
+    as "dev/fixtures/bear.gleam:29"
 }
 
 // From: dev/fixtures/bear.gleam:32
@@ -27,5 +27,5 @@ pub fn order_asc_by_name_3_test() {
   let beta = Bear(id: 2, name: "Alpha", kind: "Polar", hibernating: True)
 
   assert order_asc_by_name(alpha, beta) == order.Gt
-    as "dev/fixtures/bear.gleam:32"
+    as "dev/fixtures/bear.gleam:38"
 }
