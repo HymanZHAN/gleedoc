@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.0] - 2026-08-14
+
+### <!-- 10 -->💼 Other
+
+- Bump version number
+
+### <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- Bump deps version; bump glance to 7.x.x
+
 ## [1.0.0] - 2026-05-24
 
 ### <!-- 0 -->🚀 Features
