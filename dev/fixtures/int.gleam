@@ -46,7 +46,7 @@ pub fn absolute_value(x: Int) -> Int {
 /// ```
 ///
 /// ```gleam
-/// assert power(8, 1.5) == Ok(22.627416997969522)
+/// assert power(4, 1.5) == Ok(8.0)
 /// ```
 ///
 /// ```gleam
