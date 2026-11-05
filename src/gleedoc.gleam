@@ -9,6 +9,7 @@ import gleam/string
 import gleedoc/internal/extract
 import gleedoc/internal/generate.{Config}
 import gleedoc/internal/parse
+import gleedoc/internal/platform
 import shellout.{LetBeStderr, LetBeStdout, SetEnvironment}
 import simplifile
 import snag
@@ -232,8 +233,10 @@ pub fn run_with(config: GleedocConfig, test_main: fn() -> Nil) -> Nil {
   //
   // 1. First pass (env var unset): generate the test files, set the env var,
   //    then re-invoke `gleam test` via `shellout`, forwarding any CLI
-  //    arguments captured with `argv`. The original process does not run
-  //    `test_main` itself.
+  //    arguments captured with `argv`. `gleam test` does not forward its own
+  //    `--target` and `--runtime` flags to the program, so they are derived
+  //    from the platform the first pass is running on. The original process
+  //    does not run `test_main` itself.
   // 2. Second pass (env var set): skip generation, unset the env var, and
   //    invoke `test_main` directly so the freshly-generated tests run.
   let forwarded_args = argv.load().arguments
@@ -260,7 +263,13 @@ fn run_with_inner(
           let result =
             shellout.command(
               run: "gleam",
-              with: ["test", ..forwarded_args],
+              with: [
+                "test",
+                ..list.append(
+                  platform.gleam_flags(platform.current()),
+                  forwarded_args,
+                )
+              ],
               in: ".",
               opt: [
                 LetBeStdout,
