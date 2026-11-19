@@ -125,7 +125,7 @@ pub fn extract_module_doc_test() {
   let assert Ok(blocks) = extract.doc_blocks_from_file(store_fixture)
 
   // The module doc (////) should appear as a block without a target.
-  let module_blocks = list.filter(blocks, fn(b) { b.target == None })
+  let module_blocks = blocks |> list.filter(fn(b) { b.target == None })
   assert list.length(module_blocks) == 1
 
   let assert [module_block] = module_blocks
