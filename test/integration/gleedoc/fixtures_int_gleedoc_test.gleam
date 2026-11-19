@@ -31,7 +31,7 @@ pub fn power_4_test() {
 
 // From: dev/fixtures/int.gleam:48
 pub fn power_5_test() {
-  assert power(8, 1.5) == Ok(22.627416997969522) as "dev/fixtures/int.gleam:49"
+  assert power(4, 1.5) == Ok(8.0) as "dev/fixtures/int.gleam:49"
 }
 
 // From: dev/fixtures/int.gleam:52
