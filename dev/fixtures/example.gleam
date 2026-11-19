@@ -1,4 +1,4 @@
-import gleam/dict
+import gleam/dict.{type Dict}
 import gleam/result
 
 /// A simple example module demonstrating gleedoc.
@@ -48,7 +48,7 @@ pub type User {
 /// assert users |> find("hello") == User("", "")
 /// assert users |> find("john_doe") == john
 /// ```
-pub fn find(data: dict.Dict(String, User), name: String) {
+pub fn find(data: Dict(String, User), name: String) {
   let default_user = User("", "")
   data |> dict.get(name) |> result.unwrap(default_user)
 }

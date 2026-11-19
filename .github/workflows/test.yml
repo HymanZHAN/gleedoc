@@ -8,7 +8,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  test_versions:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -24,3 +24,11 @@ jobs:
       - if: matrix.gleam == '1.19.2'
         run: gleam format --check src test dev
       - run: gleam test
+
+  test:
+    needs: test_versions
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all compiler tests to pass
+        run: test "${{ needs.test_versions.result }}" = "success"
